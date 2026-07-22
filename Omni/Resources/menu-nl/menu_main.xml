@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<!--For all properties see: https://aka.ms/android-menu-resource-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <!--Update strings and icons-->
+  <item android:id="@+id/navigation_dashboard"
+	      android:title="Gegevens"
+	      android:icon="@drawable/baseline_dashboard_white_36dp"
+	      android:showAsAction="ifRoom"/>
+
+  <item android:id="@+id/navigation_location"
+	      android:title="Locatie"
+	      android:icon="@drawable/baseline_map_white_36dp"
+	      android:showAsAction="ifRoom"/>
+  
+  <item android:id="@+id/navigation_settings"
+	      android:title="Instellingen"
+	      android:icon="@drawable/baseline_settings_white_36dp"
+	      android:showAsAction="ifRoom"/>
+
+  <item android:id="@+id/navigation_share"
+        android:title="Delen"
+        android:icon="@drawable/baseline_share_white_36dp"
+        android:showAsAction="ifRoom"/>
+
+  <item android:id="@+id/navigation_developer"
+        android:title="Ontwikkelaar"
+        android:icon="@drawable/baseline_developer_mode_white_36dp"
+        android:showAsAction="ifRoom"/>
+
+	<item android:id="@+id/navigation_permission"
+		  android:title="Toestemmingen"
+		  android:icon="@drawable/baseline_info_white_36dp"
+		  android:showAsAction="never"/>
+
+	<item android:id="@+id/navigation_information"
+        android:title="Informatie"
+        android:icon="@drawable/baseline_info_white_36dp"
+        android:showAsAction="never"/>
+
+  <item android:id="@+id/navigation_privacy_policy"
+        android:title="Privacy"
+        android:icon="@drawable/baseline_info_white_36dp"
+        android:showAsAction="never"/>
+
+  <item android:id="@+id/navigation_close"
+        android:title="Sluiten"
+        android:icon="@drawable/baseline_cancel_white_36dp"
+        android:showAsAction="never"/>
+
+</menu>

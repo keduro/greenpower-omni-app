@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<!--
+	Strings resource file
+	Note which strings require and which do not require localising
+	Initial localisation can use: https://stringstranslator.com/
+-->
+
+<!-- SPANISH -->
+
+<resources>
+
+	<!-- strings that DO NOT require localising, see further down for strings that do require localising -->
+	
+	<string name="app_name">OMNI telemetry</string>
+
+	<string name="dashboard_value_00_00_00">00:00:00</string>
+	<string name="dashboard_value_0">0</string>
+	<string name="dashboard_value_0_0">0.0</string>
+	<string name="dashboard_value_0_0000">0.0000</string>
+
+	<string name="dashboard_unit_speed_mph">MPH</string>
+	<string name="dashboard_unit_speed_m_s">m/s</string>
+	<string name="dashboard_unit_speed_km_h">km/h</string>
+	<string name="dashboard_unit_current">A</string>
+	<string name="dashboard_unit_energy_ah">Ah</string>
+	<string name="dashboard_unit_energy_wh">Wh</string>
+	<string name="dashboard_unit_energy_kj">kJ</string>
+	<string name="dashboard_unit_distance_miles">miles</string>
+	<string name="dashboard_unit_distance_km">km</string>
+	<string name="dashboard_unit_efficiency_ah_mile">Wh/mile</string>
+	<string name="dashboard_unit_efficiency_ah_km">Wh/km</string>
+	<string name="dashboard_unit_efficiency_wh_mile">Wh/mile</string>
+	<string name="dashboard_unit_efficiency_wh_km">Wh/km</string>
+	<string name="dashboard_unit_efficiency_kj_mile">Wh/mile</string>
+	<string name="dashboard_unit_efficiency_kj_km">Wh/km</string>
+	<string name="dashboard_unit_rpm">rpm</string>
+	<string name="dashboard_unit_temperature">°C</string>
+	<string name="dashboard_unit_voltage">V</string>
+
+	<string name="dashboard_key_speed">s</string>
+	<string name="dashboard_key_rpm">m</string>
+	<string name="dashboard_key_current">i</string>
+	<string name="dashboard_key_voltage_total">v</string>
+	<string name="dashboard_key_voltage_lower">w</string>
+	<string name="dashboard_key_input_throttle">t</string>
+	<string name="dashboard_key_actual_throttle">d</string>
+	<string name="dashboard_key_temperature_1">a</string>
+	<string name="dashboard_key_temperature_2">b</string>
+	<string name="dashboard_key_temperature_3">c</string>
+	<string name="dashboard_key_launch_button">L</string>
+	<string name="dashboard_key_cycle_view_button">C</string>
+	<string name="dashboard_key_gear_ratio">r</string>
+	<string name="dashboard_key_brake_pressed">B</string>
+
+	<string name="dashboard_key_custom_data_0">0</string>
+	<string name="dashboard_key_custom_data_1">1</string>
+	<string name="dashboard_key_custom_data_2">2</string>
+	<string name="dashboard_key_custom_data_3">3</string>
+	<string name="dashboard_key_custom_data_4">4</string>
+	<string name="dashboard_key_custom_data_5">5</string>
+	<string name="dashboard_key_custom_data_6">6</string>
+	<string name="dashboard_key_custom_data_7">7</string>
+	<string name="dashboard_key_custom_data_8">8</string>
+	<string name="dashboard_key_custom_data_9">9</string>
+	<string name="dashboard_key_custom_data_w">W</string>
+	<string name="dashboard_key_custom_data_x">X</string>
+	<string name="dashboard_key_custom_data_y">Y</string>
+	<string name="dashboard_key_custom_data_z">Z</string>
+
+	<string name="dashboard_key_vupper">vupper</string>
+	<string name="dashboard_key_ah">ah</string>
+	<string name="dashboard_key_kj">kj</string>
+	<string name="dashboard_key_distance">distance</string>
+	<string name="dashboard_key_lap">lap</string>
+	<string name="dashboard_key_efficiencya">efficiencya</string>
+	<string name="dashboard_key_efficiencyj">efficiencyj</string>
+	<string name="dashboard_key_elapsed_time">elapsedtime</string>
+	<string name="dashboard_key_state">state</string>
+	<string name="dashboard_key_location">location</string>
+	<string name="dashboard_key_address">address</string>
+
+	<string name="dashboard_description_ah">amphours</string>
+	<string name="dashboard_description_kj">kilojoules</string>
+
+	<string name="dashboard_source_echook">eChook</string>
+	<string name="dashboard_source_calculated">calculated</string>
+	<string name="dashboard_source_location">location</string>
+
+	<string name="preference_key_keep_screen_on">keep_screen_on</string>
+	<string name="preference_key_car_name">car_name</string>
+	<string name="preference_key_speed">speed</string>
+	<string name="preference_key_distance">distance</string>
+	<string name="preference_key_energy">energy</string>
+	<string name="preference_key_efficiency">efficiency</string>
+	<string name="preference_key_bluetooth_category">bluetooth_category</string>
+	<string name="preference_key_bluetooth_device">bluetooth_device</string>
+	<string name="preference_key_bluetooth_nopermission">bluetooth_nopermission</string>
+	<string name="preference_key_bluetooth_nodevices">bluetooth_nodevices</string>
+	<string name="preference_key_upload">upload</string>
+
+	<string name="preference_key_upload_banchory_greenpower_car_name">upload_banchory_greenpower_car_name</string>
+	<string name="preference_key_upload_banchory_greenpower_password">upload_banchory_greenpower_password</string>
+	<string name="preference_key_upload_echook_live_data_car_name">upload_echook_live_data_car_name</string>
+	<string name="preference_key_upload_echook_live_data_password">upload_echook_live_data_password</string>
+	<string name="preference_key_upload_user_defined_url">upload_user_defined_url</string>
+	<string name="preference_key_upload_user_defined_car_name">upload_user_defined_car_name</string>
+	<string name="preference_key_upload_user_defined_username">upload_user_defined_username</string>
+	<string name="preference_key_upload_user_defined_password">upload_user_defined_password</string>
+	<string name="preference_key_upload_IMU">upload_IMU</string>
+
+	<string name="preference_default_keep_screen_on">true</string>
+	<string name="preference_default_upload_IMU">false</string>
+
+	<string name="preference_option_speed_m_s">m/s</string>
+	<string name="preference_option_speed_mph">mph</string>
+	<string name="preference_option_speed_km_h">km/h</string>
+
+	<string name="preference_option_distance_km">km</string>
+	<string name="preference_option_distance_miles">miles</string>
+
+	<string name="preference_option_energy_ah">Ah</string>
+	<string name="preference_option_energy_wh">Wh</string>
+	<string name="preference_option_energy_kj">kJ</string>
+
+	<string name="preference_option_efficiency_ah_mile">Ah/mile</string>
+	<string name="preference_option_efficiency_ah_km">Ah/km</string>
+	<string name="preference_option_efficiency_wh_mile">Wh/mile</string>
+	<string name="preference_option_efficiency_wh_km">Wh/km</string>
+	<string name="preference_option_efficiency_kj_mile">kJ/mile</string>
+	<string name="preference_option_efficiency_kj_km">kJ/km</string>
+
+	<string name="preference_option_upload_banchory_greenpower">Banchory Greenpower</string>
+	<string name="preference_option_upload_echook_live_data">eChook Private Live Data</string>
+
+	<string name="upload_banchory_greenpower_url">https://data.banchory-greenpower.org/api/telemetrydata</string>
+	<string name="upload_echook_live_data_getid_url">https://data.echook.uk/api/getid</string>
+	<string name="upload_echook_live_data_send_url">https://data.echook.uk/api/send/</string>
+
+	<string name="greenpower">greenpower.co.uk</string>
+	<string name="greenpower_link">https://www.greenpower.co.uk/</string>
+	<string name="banchory_greenpower">banchory-greenpower.org</string>
+	<string name="banchory_greenpower_link">https://banchory-greenpower.org</string>
+	<string name="echook">echook.uk</string>
+	<string name="echook_link">https://echook.uk</string>
+	<string name="echook_forum">echook.boards.net</string>
+	<string name="echook_forum_link">https://echook.boards.net</string>
+	<string name="omni_email">omni@banchory-greenpower.org</string>
+	<string name="omni_email_link">mailto://omni@banchory-greenpower.org</string>
+
+
+	<!-- strings that DO require localising -->
+
+	<string name="menu_data">Datos</string>
+	<string name="menu_location">Ubicación</string>
+	<string name="menu_settings">Configuración</string>
+	<string name="menu_share">Compartir datos</string>
+	<string name="menu_share_settings">Compartir configuración</string>
+	<string name="menu_developer">Desarrollador</string>
+	<string name="menu_permissions">Permisos</string>
+	<string name="menu_info">Información</string>
+	<string name="menu_privacy">Privacidad</string>
+	<string name="menu_close">Cerrar</string>
+	<string name="menu_support">Soporte</string>
+
+	<string name="dashboard_unknown_location">Ubicación desconocida</string>
+	<string name="dashboard_unit_plusminus_m">m de&#160;</string>
+	<string name="dashboard_bluetooth_status">Estado de Bluetooth</string>
+	<string name="dashboard_upload_status">Estado de carga</string>
+	<string name="location_map_type">Tipo de mapa</string>
+
+	<string name="dashboard_unit_time">tiempo</string>
+	<string name="dashboard_unit_elapsed">carrera</string>
+	<string name="dashboard_unit_lap">vuelta</string>
+	<string name="dashboard_unit_gear">relación de marchas</string>
+	<string name="dashboard_unit_throttle">%aceleración</string>
+	<string name="dashboard_unit_brake">%frenado</string>
+	
+	<string name="dashboard_description_speed">velocidad de la carretera</string>
+	<string name="dashboard_description_rpm">rpm del motor</string>
+	<string name="dashboard_description_current">corriente</string>
+	<string name="dashboard_description_voltage_total">voltaje total</string>
+	<string name="dashboard_description_voltage_lower">voltaje bajo</string>
+	<string name="dashboard_description_input_throttle">acelerador de entrada</string>
+	<string name="dashboard_description_actual_throttle">acelerador real</string>
+	<string name="dashboard_description_temperature_1">temperatura 1</string>
+	<string name="dashboard_description_temperature_2">temperatura 2</string>
+	<string name="dashboard_description_temperature_3">temperatura 3</string>
+	<string name="dashboard_description_launch_button">botón de lanzamiento</string>
+	<string name="dashboard_description_cycle_view_button">botón de vista cíclica</string>
+	<string name="dashboard_description_gear_ratio">relación de marcha</string>
+	<string name="dashboard_description_brake_pressed">freno presionado</string>
+
+	<string name="dashboard_description_custom_data_0">dato personalizado 0</string>
+	<string name="dashboard_description_custom_data_1">dato personalizado 1</string>
+	<string name="dashboard_description_custom_data_2">dato personalizado 2</string>
+	<string name="dashboard_description_custom_data_3">dato personalizado 3</string>
+	<string name="dashboard_description_custom_data_4">dato personalizado 4</string>
+	<string name="dashboard_description_custom_data_5">dato personalizado 5</string>
+	<string name="dashboard_description_custom_data_6">dato personalizado 6</string>
+	<string name="dashboard_description_custom_data_7">dato personalizado 7</string>
+	<string name="dashboard_description_custom_data_8">dato personalizado 8</string>
+	<string name="dashboard_description_custom_data_9">dato personalizado 9</string>
+	<string name="dashboard_description_custom_data_w">dato personalizado W</string>
+	<string name="dashboard_description_custom_data_x">dato personalizado X</string>
+	<string name="dashboard_description_custom_data_y">dato personalizado Y</string>
+	<string name="dashboard_description_custom_data_z">dato personalizado Z</string>
+
+	<string name="dashboard_description_vupper">vupper</string>
+	<string name="dashboard_description_distance">distancia</string>
+	<string name="dashboard_description_lap">vuelta</string>
+	<string name="dashboard_description_efficiencya">eficiencia Ah/milla</string>
+	<string name="dashboard_description_efficiencyj">eficiencia kJ/milla</string>
+	<string name="dashboard_description_elapsed_time">tiempo transcurrido</string>
+	<string name="dashboard_description_state">estado</string>
+	<string name="dashboard_description_location">ubicación</string>
+	<string name="dashboard_description_address">dirección</string>
+
+	<string name="preference_title_general">General</string>
+	<string name="preference_title_units">Unidades</string>
+	<string name="preference_title_bluetooth">Bluetooth</string>
+	<string name="preference_title_upload">Carga de datos</string>
+	<string name="preference_title_keep_screen_on">Mantener pantalla encendida</string>
+	<string name="preference_title_car_name">Nombre del coche</string>
+	<string name="preference_title_speed">Velocidad</string>
+	<string name="preference_title_distance">Distancia</string>
+	<string name="preference_title_energy">Energía</string>
+	<string name="preference_title_efficiency">Eficiencia</string>
+	<string name="preference_title_bluetooth_device">Dispositivo</string>
+	<string name="preference_title_upload_target">Cargar a</string>
+
+	<string name="preference_title_upload_banchory_greenpower_car_name">Nombre del coche</string>
+	<string name="preference_title_upload_banchory_greenpower_password">Contraseña</string>
+	<string name="preference_title_upload_echook_live_data_car_name">Nombre del coche</string>
+	<string name="preference_title_upload_echook_live_data_password">Contraseña</string>
+	<string name="preference_title_upload_user_defined_url">URL</string>
+	<string name="preference_title_upload_user_defined_car_name">Nombre del coche</string>
+	<string name="preference_title_upload_user_defined_username">Nombre de usuario</string>
+	<string name="preference_title_upload_user_defined_password">Contraseña</string>
+	<string name="preference_title_upload_IMU">Cargar datos del acelerómetro y del giroscopio</string>
+
+	<string name="preference_summary_bluetooth_nopermission">Permiso de Bluetooth (dispositivos cercanos) no concedido</string>
+	<string name="preference_summary_bluetooth_nodevices">No se encontraron dispositivos Bluetooth</string>
+
+	<string name="preference_default_car_name">Coche</string>
+	<string name="preference_dialog_car_name">Nombre del coche usado en el archivo de registro</string>
+
+	<string name="preference_dialog_upload_banchory_greenpower_car_name">Nombre del coche para telemetría</string>
+	<string name="preference_dialog_upload_banchory_greenpower_password">Contraseña de Banchory Greenpower</string>
+	<string name="preference_dialog_upload_echook_live_data_car_name">Nombre del coche usado para iniciar sesión en eChook.uk</string>
+	<string name="preference_dialog_upload_echook_live_data_password">Contraseña usada para iniciar sesión en eChook.uk</string>
+	<string name="preference_dialog_upload_user_defined_url">URL a la que subir los datos</string>
+	<string name="preference_dialog_upload_user_defined_car_name">Nombre del coche para telemetría</string>
+	<string name="preference_dialog_upload_user_defined_username">Nombre de usuario</string>
+	<string name="preference_dialog_upload_user_defined_password">Contraseña</string>
+
+	<string name="preference_option_upload_none">Ningún sitio</string>
+	<string name="preference_option_upload_user_defined">Definido por el usuario</string>
+
+	<string name="information_title">Información de telemetría OMNI</string>
+	<string name="permissions_title">Permisos de telemetría OMNI</string>
+	<string name="support_title">Soporte de telemetría OMNI</string>
+	<string name="share_settings_title">Configuración de uso compartido de OMNI</string>
+	<string name="developer_title">Desarrollador de telemetría OMNI</string>
+	<string name="privacy_policy_title">Política de privacidad de telemetría OMNI</string>
+	<string name="links">Enlaces</string>
+
+	<string name="information_text">
+		Desarrollada y mantenida por el equipo de Banchory Greenpower, la aplicación de telemetría OMNI funciona con el sistema de registro de datos y telemetría eChook creado por echook.uk para coches eléctricos que participan en el desafío del Greenpower Education Trust. &lt;br />&lt;br />
+		La aplicación se conecta al eChook mediante Bluetooth para recopilar datos de los sensores, incluidos el voltaje de la batería, la corriente, las rpm del motor, la velocidad, el acelerador, el freno y las temperaturas. La aplicación calcula la distancia recorrida y el consumo de batería a partir de los datos de los sensores y adquiere la posición del coche. &lt;br />&lt;br />
+		Los datos pueden mostrarse en varios paneles de control de diferentes tamaños y orientaciones de dispositivo para proporcionar una visualización dentro del coche. &lt;br />&lt;br />
+		La aplicación registra los datos cada 0,25 s en un archivo que puede compartirse o descargarse para su análisis posterior. &lt;br />&lt;br />
+		La aplicación también puede subir los datos de telemetría a un sitio web, como los datos en tiempo real de eChook o a una ubicación definida por el usuario, para permitir que los datos se visualicen casi en tiempo real durante las pruebas o carreras.
+	</string>
+
+	<string name="support_text">
+		La aplicación de telemetría OMNI sigue siendo desarrollada y mantenida por el equipo de Banchory Greenpower. Sus comentarios y opiniones son muy bienvenidos.
+		Nos esforzaremos por responder lo antes posible. &lt;br />&lt;br />
+		Le animamos a utilizar el foro de soporte de eChook para discusiones generales sobre la aplicación, informar de un error, sugerir mejores traducciones a idiomas que no sean el inglés,
+		o solicitar una posible mejora.
+		También puede enviarnos un correo electrónico a la dirección que aparece a continuación.
+	</string>
+
+	<string name="share_settings_text">
+		Esta pantalla permite a los equipos transferir fácilmente configuraciones clave específicas del coche de un teléfono a otro usando un código QR. El código puede mostrarse en un teléfono y luego ser escaneado por otro teléfono al que se deben transferir las configuraciones. Alternativamente, el código puede compartirse, imprimirse, laminarse y adherirse a un coche, facilitando que la aplicación siempre esté configurada correctamente al escanear el código.
+		&lt;br />&lt;br />
+		El código QR a continuación contiene la configuración actual guardada en este teléfono.
+	</string>
+	<string name="share_settings_permission_rationale">"Sin permiso de cámara no será posible escanear códigos QR"</string>
+	<string name="share_settings_alert">"Actualizar configuraciones a lo siguiente:"</string>
+	
+	<string name="developer_heading_set_state">Lanzamiento y conteo de vueltas</string>
+	<string name="developer_desc2_set_state">Simula pulsar el botón de lanzamiento para restablecer el estado a esperando a que se presione el acelerador, como cuando se espera el inicio de la carrera. En este estado se adquiere la posición GPS de la salida para el conteo de vueltas.</string>
+	<string name="developer_desc3_set_state">Simula presionar el acelerador y establecer el estado a en marcha y comenzar el cronómetro de la carrera. En este estado se utiliza la posición GPS actual y la posición de la salida para calcular la vuelta activa actual.</string>
+
+	<string name="set">Establecer</string>
+
+	<string name="battery_optimisation_title">Desactivar la optimización de batería (permitir uso en segundo plano)</string>
+	<string name="battery_optimisation_message">
+		La optimización de batería está actualmente habilitada para la aplicación, pero necesita desactivarse para permitir
+		la aplicación continúe ejecutándose cuando la aplicación esté inactiva o la pantalla esté apagada. En algunos teléfonos, la configuración para desactivar la optimización de batería
+		puede mostrarse como permitir uso en segundo plano. Si la optimización de batería no está desactivada, lo más probable es que la aplicación se ejecute durante
+		algún tiempo y luego simplemente deje de funcionar.
+	</string>
+	<string name="battery_optimisation_disallow">Desactivar la optimización de batería</string>
+	
+	<string name="permissions_text">
+		Para que la aplicación de telemetría OMNI funcione correctamente, se debe otorgar permiso explícito para usar datos de ubicación precisos, para usar una conexión bluetooth y para publicar notificaciones. Se debe conceder permiso para todos estos casos. &lt;br />&lt;br />
+		&lt;b>Datos de ubicación precisos&lt;/b> permite determinar la posición del coche en la pista.
+		&lt;b>Dispositivos cercanos&lt;/b> permite que el teléfono establezca una conexión bluetooth con un dispositivo cercano, por ejemplo un eChook, para recopilar datos de sensores del coche en tiempo real, como voltajes, corriente, velocidad y temperaturas.
+		&lt;b>Notificaciones&lt;/b> permite que la aplicación publique una notificación que muestra que los datos de ubicación y los datos de los sensores del coche siguen recopilándose incluso cuando la aplicación no está visible o la pantalla está apagada. &lt;br />&lt;br />
+		Los datos de ubicación y los datos de los sensores del coche se guardan en un archivo en el teléfono para análisis posteriores. Los datos de ubicación y los datos de los sensores del coche también pueden subirse opcionalmente para mostrarse en pantallas de telemetría remotas.
+	</string>
+	<string name="permissions_location_alert_title">Permiso de ubicación</string>
+	<string name="permissions_location_alert_message">
+		Por favor, seleccione \'Allow all the time\' en la siguiente pantalla para permitir el acceso a la ubicación de este dispositivo todo el tiempo, incluso cuando la aplicación no esté visible o la pantalla esté apagada. No elimine el acceso a la ubicación en la siguiente pantalla, de lo contrario la aplicación se cerrará inmediatamente (¡este es el comportamiento normal de las aplicaciones Android!).
+	</string>
+	<string name="permissions_allow_fine_location">permitir ubicación precisa</string>
+	<string name="permissions_allow_background_location">permitir acceso a la ubicación todo el tiempo</string>
+	<string name="permissions_allow_bluetooth">permitir acceso a dispositivos cercanos para conexión bluetooth</string>
+	<string name="permissions_allow_notifications">permitir notificaciones</string>
+	<string name="permissions_permission_to">"Permiso para "</string>
+	<string name="permissions_rationale_1">" es necesario para que la aplicación de telemetría Omni funcione. Si no otorga este permiso la próxima vez que se solicite, solo podrá actualizarlo en la configuración de la aplicación Omni."</string>
+	<string name="permissions_rationale_2">" no ha sido concedido y ahora solo puede actualizarse en la configuración de la aplicación Omni."</string>
+	<string name="permissions_premission_required">Permiso requerido</string>
+	<string name="permissions_all_allowed">Todos los permisos requeridos han sido concedidos.</string>
+	<string name="permissions_allow">Conceder permisos</string>
+	<string name="permissions_continue">Continuar al panel</string>
+
+	<string name="dialog_ok">Aceptar</string>
+	<string name="dialog_cancel">Cancelar</string>
+	<string name="dialog_close">Cerrar</string>
+	<string name="dialog_share">Compartir</string>
+	<string name="dialog_close_omni_text">¿Cerrar la telemetría OMNI?</string>
+	<string name="dialog_share_logged_data">Compartir datos registrados CSV</string>
+	<string name="dialog_share_qrcode">Compartir código QR de configuración</string>
+	<string name="snackbar_waiting_for">Esperando a&#160;</string>
+	<string name="snackbar_percent_throttle">% de aceleración /&#160;</string>
+	<string name="snackbar_current">A corriente</string>
+	<string name="snackbar_dismiss">Descartar</string>
+	<string name="snackbar_lap_counting_started">Conteo de vueltas iniciado</string>
+	<string name="snackbar_demonstration">Demostración usando datos grabados</string>
+	<string name="snackbar_go">Ir</string>
+	
+</resources>

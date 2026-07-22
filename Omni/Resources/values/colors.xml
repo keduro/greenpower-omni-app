@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources>
+    <color name="colorPrimary">#008A35</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="splash_background">#008A35</color>
+    <color name="colorFail">@android:color/holo_red_light</color>
+    <color name="colorOk">#008A35</color>
+	<color name="colorOverflow">#FFFFFF</color>
+    <color name="location_accuracy_fill">#40008A35</color>
+    <color name="location_accuracy_solid">#008A35</color>
+	<color name="colorButton">#00BC48</color>
+</resources>

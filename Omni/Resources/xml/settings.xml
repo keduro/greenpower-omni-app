@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <PreferenceCategory
+        android:title="@string/preference_title_general">
+        <SwitchPreferenceCompat
+            android:key="@string/preference_key_keep_screen_on"
+            android:title="@string/preference_title_keep_screen_on"
+            android:defaultValue="@string/preference_default_keep_screen_on" />
+        <EditTextPreference
+            android:key="@string/preference_key_car_name"
+            android:title="@string/preference_title_car_name"
+            android:dialogMessage="@string/preference_dialog_car_name"
+            android:defaultValue="@string/preference_default_car_name" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/preference_title_units">
+        <ListPreference
+            android:key="@string/preference_key_speed"
+            android:title="@string/preference_title_speed"
+            android:summary="%s"
+            android:defaultValue="@string/preference_option_speed_mph"
+            android:entries="@array/preference_options_speed"
+            android:entryValues="@array/preference_options_speed"
+            />
+        <ListPreference
+            android:key="@string/preference_key_distance"
+            android:title="@string/preference_title_distance"
+            android:summary="%s"
+            android:defaultValue="@string/preference_option_distance_miles"
+            android:entries="@array/preference_options_distance"
+            android:entryValues="@array/preference_options_distance"
+            />
+        <ListPreference
+            android:key="@string/preference_key_energy"
+            android:title="@string/preference_title_energy"
+            android:summary="%s"
+            android:defaultValue="@string/preference_option_energy_ah"
+            android:entries="@array/preference_options_energy"
+            android:entryValues="@array/preference_options_energy"
+            />
+        <ListPreference
+            android:key="@string/preference_key_efficiency"
+            android:title="@string/preference_title_efficiency"
+            android:summary="%s"
+            android:defaultValue="@string/preference_option_efficiency_ah_mile"
+            android:entries="@array/preference_options_efficiency"
+            android:entryValues="@array/preference_options_efficiency"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="@string/preference_key_bluetooth_category"
+        android:title="@string/preference_title_bluetooth">
+        <ListPreference
+            android:key="@string/preference_key_bluetooth_device"
+            android:title="@string/preference_title_bluetooth_device"
+            android:summary="%s"
+            />
+		<Preference
+            android:key="@string/preference_key_bluetooth_nopermission"
+            android:summary="@string/preference_summary_bluetooth_nopermission"
+            />
+		<Preference
+            android:key="@string/preference_key_bluetooth_nodevices"
+            android:summary="@string/preference_summary_bluetooth_nodevices"
+            />
+	</PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/preference_title_upload">
+
+		<!-- Option to include acceleromoter and gyro data in upload -->
+
+		<SwitchPreferenceCompat
+            android:key="@string/preference_key_upload_IMU"
+            android:title="@string/preference_title_upload_IMU"
+            android:defaultValue="@string/preference_default_upload_IMU" />
+
+        <!-- List of options for where to upload to -->
+
+		<ListPreference
+            android:key="@string/preference_key_upload"
+            android:title="@string/preference_title_upload_target"
+            android:summary="%s"
+            android:entries="@array/preference_options_upload"
+            android:entryValues="@array/preference_options_upload"
+              />
+
+		<!-- Setup for upload to Banchory Greenpower  -->
+
+		<EditTextPreference
+            android:key="@string/preference_key_upload_banchory_greenpower_car_name"
+            android:title="@string/preference_title_upload_banchory_greenpower_car_name"
+            android:dialogMessage="@string/preference_dialog_upload_banchory_greenpower_car_name"
+              />
+		<EditTextPreference
+            android:key="@string/preference_key_upload_banchory_greenpower_password"
+            android:title="@string/preference_title_upload_banchory_greenpower_password"
+            android:dialogMessage="@string/preference_dialog_upload_banchory_greenpower_password"
+              />
+
+		<!-- Setup for upload to eChook Private Live Data  -->
+
+		<EditTextPreference
+            android:key="@string/preference_key_upload_echook_live_data_car_name"
+            android:title="@string/preference_title_upload_echook_live_data_car_name"
+            android:dialogMessage="@string/preference_dialog_upload_echook_live_data_car_name"
+              />
+		<EditTextPreference
+			android:key="@string/preference_key_upload_echook_live_data_password"
+			android:title="@string/preference_title_upload_echook_live_data_password"
+			android:dialogMessage="@string/preference_dialog_upload_echook_live_data_password"
+              />
+
+		<!-- Setup for upload to user defined  -->
+
+		<EditTextPreference
+            android:key="@string/preference_key_upload_user_defined_car_name"
+            android:title="@string/preference_title_upload_user_defined_car_name"
+            android:dialogMessage="@string/preference_dialog_upload_user_defined_car_name"
+                  />
+		<EditTextPreference
+            android:key="@string/preference_key_upload_user_defined_url"
+            android:title="@string/preference_title_upload_user_defined_url"
+            android:dialogMessage="@string/preference_dialog_upload_user_defined_url"
+                  />
+		<EditTextPreference
+            android:key="@string/preference_key_upload_user_defined_username"
+            android:title="@string/preference_title_upload_user_defined_username"
+            android:dialogMessage="@string/preference_dialog_upload_user_defined_username"
+                  />
+		<EditTextPreference
+            android:key="@string/preference_key_upload_user_defined_password"
+            android:title="@string/preference_title_upload_user_defined_password"
+            android:dialogMessage="@string/preference_dialog_upload_user_defined_password"
+                  />
+
+	</PreferenceCategory>
+
+</PreferenceScreen>

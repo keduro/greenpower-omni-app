@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources>
+
+  <array name="preference_options_speed">
+    <item>@string/preference_option_speed_m_s</item>
+    <item>@string/preference_option_speed_mph</item>
+    <item>@string/preference_option_speed_km_h</item>
+  </array>
+
+  <array name="preference_options_distance">
+    <item>@string/preference_option_distance_km</item>
+    <item>@string/preference_option_distance_miles</item>
+  </array>
+
+  <array name="preference_options_energy">
+    <item>@string/preference_option_energy_ah</item>
+    <item>@string/preference_option_energy_wh</item>
+    <item>@string/preference_option_energy_kj</item>
+  </array>
+
+  <array name="preference_options_efficiency">
+    <item>@string/preference_option_efficiency_ah_mile</item>
+    <item>@string/preference_option_efficiency_ah_km</item>
+    <item>@string/preference_option_efficiency_wh_mile</item>
+    <item>@string/preference_option_efficiency_wh_km</item>
+    <item>@string/preference_option_efficiency_kj_mile</item>
+    <item>@string/preference_option_efficiency_kj_km</item>
+  </array>
+
+  <array name="preference_options_upload">
+    <item>@string/preference_option_upload_none</item>
+    <item>@string/preference_option_upload_banchory_greenpower</item>
+    <item>@string/preference_option_upload_echook_live_data</item>
+    <item>@string/preference_option_upload_user_defined</item>
+  </array>
+
+</resources>
+
+

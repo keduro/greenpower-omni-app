@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/activity_borders">
+
+    <!-- bluetooth and upload indicators -->
+
+    <ImageView
+        android:id="@+id/bluetoothindicatorimageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/uploadindicatorimageview"
+        android:contentDescription="@string/dashboard_bluetooth_status"
+        android:src="@drawable/round_bluetooth_connected_green_20dp"
+    />
+    <ImageView
+        android:id="@+id/uploadindicatorimageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dashboard_horizontal_margin"
+        android:contentDescription="@string/dashboard_upload_status"
+        android:src="@drawable/round_cloud_upload_red_20dp"
+    />
+
+    <!-- location -->
+
+    <TextView
+        android:id="@+id/locationaccuracytextview"
+        android:text="@string/dashboard_unit_plusminus_m"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="@dimen/dashboard_horizontal_margin"
+        style="@style/dashboard_values_xs"
+    />
+    <TextView
+        android:id="@+id/addresstextview"
+        android:text="@string/dashboard_unknown_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/locationaccuracytextview"
+        android:layout_toLeftOf="@id/bluetoothindicatorimageview"
+        android:gravity="left"
+        android:lines="2"
+        android:maxLines="2"
+        style="@style/dashboard_values_xs"
+    />
+
+    <!-- time of day and elapsed time -->
+
+    <TextView
+        android:id="@+id/timeofdaytextview"
+        android:text="@string/dashboard_value_00_00_00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/addresstextview"
+        android:layout_marginLeft="@dimen/dashboard_horizontal_margin"
+        style="@style/dashboard_values_m"
+    />
+    <TextView
+        android:text="@string/dashboard_unit_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/timeofdaytextview"
+        android:layout_alignBaseline="@id/timeofdaytextview"
+        style="@style/dashboard_units_m"
+    />
+    <TextView
+        android:id="@+id/elapsedtimetextview"
+        android:text="@string/dashboard_value_00_00_00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/timeofdaytextview"
+        android:layout_marginLeft="@dimen/dashboard_horizontal_margin"
+        style="@style/dashboard_values_m"
+    />
+    <TextView
+        android:id="@+id/elapsedtimeunittextview"
+        android:text="@string/dashboard_unit_elapsed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/elapsedtimetextview"
+        android:layout_alignBaseline="@id/elapsedtimetextview"
+        style="@style/dashboard_units_m"
+    />
+
+    <!-- speed -->
+
+    <TextView
+        android:id="@+id/speedtextview"
+        android:text="@string/dashboard_value_0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/elapsedtimeunittextview"
+        android:layout_toLeftOf="@id/speedunittextview"
+        android:layout_alignBaseline="@id/elapsedtimetextview"
+        style="@style/dashboard_values_xxl"
+    />
+    <TextView
+        android:id="@+id/speedunittextview"
+        android:text="@string/dashboard_unit_speed_mph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dashboard_horizontal_margin"
+        android:layout_alignBaseline="@id/speedtextview"
+        style="@style/dashboard_units_xxl"
+    />
+
+    <!-- use table layout for two columns of value and units -->
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="@dimen/dashboard_horizontal_margin"
+        android:layout_marginRight="@dimen/dashboard_horizontal_margin"
+        android:layout_below="@id/elapsedtimetextview">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dashboard_line_thickness"
+            android:background="@android:color/darker_gray"/>
+
+        <!-- distance, lap -->
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/distancetextview"
+                android:text="@string/dashboard_value_0_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:id="@+id/distanceunittextview"
+                android:text="@string/dashboard_unit_distance_miles"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+            <TextView
+                android:id="@+id/laptextview"
+                android:text="@string/dashboard_value_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_lap"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+        </TableRow>
+
+        <!-- current, energy -->
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/currenttextview"
+                android:text="@string/dashboard_value_0_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_current"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+            <TextView
+                android:id="@+id/energytextview"
+                android:text="@string/dashboard_value_0_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:id="@+id/energyunittextview"
+                android:text="@string/dashboard_unit_energy_ah"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+        </TableRow>
+
+        <!-- battery voltages -->
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/vlowertextview"
+                android:text="@string/dashboard_value_0_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_voltage"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+            <TextView
+                android:id="@+id/vuppertextview"
+                android:text="@string/dashboard_value_0_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_voltage"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dashboard_line_thickness"
+            android:background="@android:color/darker_gray"/>
+
+        <!-- gear, rpm -->
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/geartextview"
+                android:text="@string/dashboard_value_0_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_gear"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+            <TextView
+                android:id="@+id/rpmtextview"
+                android:text="@string/dashboard_value_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_rpm"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+        </TableRow>
+
+        <!-- throttle, brake -->
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/inputthrottletextview"
+                android:text="@string/dashboard_value_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_throttle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+            <TextView
+                android:id="@+id/brakepressedtextview"
+                android:text="@string/dashboard_value_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_brake"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+        </TableRow>
+
+        <!-- temperatures -->
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/temperature1textview"
+                android:text="@string/dashboard_value_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_temperature"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+            <TextView
+                android:id="@+id/temperature2textview"
+                android:text="@string/dashboard_value_0"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_values_l"
+            />
+            <TextView
+                android:text="@string/dashboard_unit_temperature"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/dashboard_units_l"
+            />
+        </TableRow>
+    </TableLayout>
+
+
+
+</RelativeLayout>

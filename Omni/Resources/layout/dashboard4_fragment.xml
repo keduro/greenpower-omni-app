@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The OMNI telemetry app logs data and uploads data captured by 
+    eChook.uk systems for Greenpower electric cars.
+    Copyright (C) 2026  Keith Roberts
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/activity_borders">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- bluetooth and upload indicators -->
+
+        <ImageView
+            android:id="@+id/bluetoothindicatorimageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/uploadindicatorimageview"
+            android:contentDescription="@string/dashboard_bluetooth_status"
+            android:src="@drawable/round_bluetooth_connected_green_20dp"
+        />
+        <ImageView
+            android:id="@+id/uploadindicatorimageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/dashboard_horizontal_margin"
+            android:contentDescription="@string/dashboard_upload_status"
+            android:src="@drawable/round_cloud_upload_red_20dp"
+        />
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/bluetoothindicatorimageview"
+            android:stretchColumns="*">
+
+            <!--
+
+            <include layout="@layout/dashboard3_1"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dashboard_line_thickness"
+                android:background="@android:color/darker_gray"/>
+
+            -->
+
+            <include layout="@layout/dashboard3_2"/>
+
+            <!--
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dashboard_line_thickness"
+                android:background="@android:color/darker_gray"/>
+
+            <include layout="@layout/dashboard3_3"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dashboard_scroll_padding"/>
+            
+            -->
+
+        </TableLayout>
+
+    </RelativeLayout>
+
+</ScrollView>
