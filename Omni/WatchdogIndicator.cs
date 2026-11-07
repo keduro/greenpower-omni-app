@@ -27,7 +27,7 @@ namespace Omni
         readonly int okImageResourceId;
         readonly int failImageResourceId;
 
-        readonly Timer watchdogTimer;
+        Timer? watchdogTimer = null;
 
         public WatchdogIndicator(int WatchdogInterval, Activity Activity, ImageView? View, int OkImageResourceId, int FailImageResourceId)
         {
@@ -47,7 +47,15 @@ namespace Omni
         public void Kick()
         {
             SetImage(true);
-            watchdogTimer.Interval = watchdogInterval;
+            watchdogTimer?.Interval = watchdogInterval;
+        }
+
+        public void Stop()
+        {
+            SetImage(false);
+            watchdogTimer?.Stop();
+            watchdogTimer?.Dispose();
+            watchdogTimer = null;
         }
 
         private void WatchdogTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs? e)

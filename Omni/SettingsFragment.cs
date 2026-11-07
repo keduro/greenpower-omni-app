@@ -17,12 +17,24 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using Java.Lang;
+
 namespace Omni
 {
     public class SettingsFragment : PreferenceFragmentCompat, IFragmentServiceUpdates, ISharedPreferencesOnSharedPreferenceChangeListener
     {
+        private readonly int[] maskedPreferenceIntKeys = [  Resource.String.preference_key_upload_banchory_greenpower_password,
+                                                            Resource.String.preference_key_upload_echook_live_data_password,
+                                                            Resource.String.preference_key_upload_user_defined_password ];
+        private string[]? maskedPreferenceKeys;
+
         public override void OnCreatePreferences(Bundle? savedInstanceState, string? rootKey)
         {
+            // Set custom data store which encrypts all strings
+            PreferenceManager?.PreferenceDataStore = EncryptedPreferenceHelper.DataStore;
+            EncryptedPreferenceHelper.DataStore?.EncryptedPreferenceChanged += (s, e) => { OnSharedPreferenceChanged(e.SharedPreferences, e.Key); };
+
+            // Build preferences screen from settings
             AddPreferencesFromResource(Resource.Xml.settings);
 
             ListPreference? bluetoothDeviceListPreference = (ListPreference?)FindPreference(Resources.GetString(Resource.String.preference_key_bluetooth_device));
@@ -54,8 +66,25 @@ namespace Omni
                 bluetoothNoPermissionPreference?.Visible = true;
                 bluetoothNoDevicesPreference?.Visible = false;
             }
+
+            // Find the keys for preferences which will have their input masked (i.e. passwords)
+            List<string> maskedPrefKeys = [];
+            foreach (var key in maskedPreferenceIntKeys)
+            {
+                var maskedPrefKey = GetString(key);
+                if (maskedPrefKey != null) maskedPrefKeys.Add(maskedPrefKey);
+            }
+            maskedPreferenceKeys = [.. maskedPrefKeys];
+
+            // Add on edit bind listeners to settings to mask the password values
+            foreach (var key in maskedPreferenceKeys)
+            {
+                var maskedPref = (EditTextPreference?)FindPreference(key);
+                maskedPref?.SetOnBindEditTextListener(new PasswordOnEditBindListener());
+            }
+
             ISharedPreferences? sharedPreferences = null;
-            if (Activity != null) sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this.Activity);
+            if (Activity != null) sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(Activity);
             if (sharedPreferences != null) OnSharedPreferenceChanged(sharedPreferences, Resources.GetString(Resource.String.preference_key_car_name));
         }
 
@@ -71,25 +100,61 @@ namespace Omni
             PreferenceScreen?.SharedPreferences?.UnregisterOnSharedPreferenceChangeListener(this);
         }
 
-        public void OnSharedPreferenceChanged(ISharedPreferences? sharedPreferences, string? key)
+        public void OnSharedPreferenceChanged(ISharedPreferences? sharedPreferences, string? changedPreference)
         {
-            SetBluetoothPreferencesVisibility();
-            SetUploadPreferencesVisibility();
+            if (IsAdded && Context != null)
+            {
+                SetBluetoothPreferencesVisibility();
+                SetUploadPreferencesVisibility();
+            }
 
             if (sharedPreferences != null && sharedPreferences.All != null)
             {
                 // Ignore the specific preference changed, update all edit text preference summaries with the preference value
-                foreach ((string k, object _) in sharedPreferences.All)
+                foreach ((string key, object _) in sharedPreferences.All)
                 {
-                    var preference = FindPreference(k);
+                    var preference = FindPreference(key);
                     if (preference is EditTextPreference)
                     {
                         var editTextPreference = preference as EditTextPreference;
-                        preference.Summary = editTextPreference?.Text;
+                        if (maskedPreferenceKeys.Contains(key))
+                        {
+                            // update the summary with dots to mask password settings values
+                            var dotText = string.Empty;
+                            if (editTextPreference != null && editTextPreference.Text != null && editTextPreference.Text.Length > 0)
+                            {
+                                StringBuilder sb = new();
+                                for (var i = 0; i < editTextPreference.Text.Length; i++) sb.Append("●");
+                                dotText = sb.ToString();
+                            }
+                            preference.Summary = dotText;
+                        }
+                        else
+                        {
+                            // update the summary
+                            preference.Summary = editTextPreference?.Text;
+                        }
                     }
                 }
             }
 
+            if (sharedPreferences != null && !string.IsNullOrWhiteSpace(changedPreference) && changedPreference.Equals("upload_user_defined_url"))
+            {
+                var url = (FindPreference(changedPreference) as EditTextPreference)?.Text;                              // get url user defined upload url
+                if (   !System.Uri.TryCreate(url, UriKind.Absolute, out System.Uri? validUri)                           // check if its valid
+                    || !string.Equals(validUri.Scheme, System.Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))  // check if the scheme is https
+                {                                                                                                       // if neither let user know its unacceptable
+                    var activityMainView = Activity?.FindViewById(Resource.Id.activity_main);
+                    if (activityMainView != null)
+                    {
+                        Snackbar.Make(activityMainView,
+                                      Resources.GetString(Resource.String.snackbar_upload_https),
+                                      Snackbar.LengthIndefinite)
+                            .SetAction(Resources.GetString(Resource.String.snackbar_dismiss), (o) => { })
+                            .Show();
+                    }
+                }
+            }
         }
 
         private void SetBluetoothPreferencesVisibility()
@@ -107,24 +172,32 @@ namespace Omni
             uploadListPreference?.SetEntries(optionsId);
             uploadListPreference?.SetEntryValues(optionsId);
 
-            var uploadTo = string.Empty;
-            if (Activity != null) uploadTo = PreferenceManager.GetDefaultSharedPreferences(Activity)?.GetString(Resources.GetString(Resource.String.preference_key_upload), string.Empty);
+            var uploadTo = uploadListPreference?.Value ?? string.Empty;
             bool uploadToBanchoryGreenpower = (uploadTo == GetString(Resource.String.preference_option_upload_banchory_greenpower));
-            bool uploadToEchookLiveData     = (uploadTo == GetString(Resource.String.preference_option_upload_echook_live_data));
-            bool uploadToUserDefined        = (uploadTo == GetString(Resource.String.preference_option_upload_user_defined));
+            bool uploadToEchookLiveData = (uploadTo == GetString(Resource.String.preference_option_upload_echook_live_data));
+            bool uploadToUserDefined = (uploadTo == GetString(Resource.String.preference_option_upload_user_defined));
 
             ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_banchory_greenpower_car_name)))?.Visible = uploadToBanchoryGreenpower;
             ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_banchory_greenpower_password)))?.Visible = uploadToBanchoryGreenpower;
-            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_echook_live_data_car_name   )))?.Visible = uploadToEchookLiveData;
-            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_echook_live_data_password   )))?.Visible = uploadToEchookLiveData;
-            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_car_name       )))?.Visible = uploadToUserDefined;
-            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_url            )))?.Visible = uploadToUserDefined;
-            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_username       )))?.Visible = uploadToUserDefined;
-            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_password       )))?.Visible = uploadToUserDefined;
+            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_echook_live_data_car_name)))?.Visible = uploadToEchookLiveData;
+            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_echook_live_data_password)))?.Visible = uploadToEchookLiveData;
+            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_car_name)))?.Visible = uploadToUserDefined;
+            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_url)))?.Visible = uploadToUserDefined;
+            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_username)))?.Visible = uploadToUserDefined;
+            ((EditTextPreference?)FindPreference(GetString(Resource.String.preference_key_upload_user_defined_password)))?.Visible = uploadToUserDefined;
 
-            ((SwitchPreferenceCompat?)FindPreference(GetString(Resource.String.preference_key_upload_IMU                     )))?.Visible = uploadToBanchoryGreenpower
-                                                                                                                                         || uploadToEchookLiveData
-                                                                                                                                         || uploadToUserDefined;
+            ((SwitchPreferenceCompat?)FindPreference(GetString(Resource.String.preference_key_upload_IMU)))?.Visible = uploadToBanchoryGreenpower
+                                                                                                                                            || uploadToEchookLiveData
+                                                                                                                                            || uploadToUserDefined;
         }
     }
+
+    public class PasswordOnEditBindListener : Java.Lang.Object, EditTextPreference.IOnBindEditTextListener
+    {
+        public void OnBindEditText(EditText editText)
+        {
+            editText.InputType = Android.Text.InputTypes.ClassText | Android.Text.InputTypes.TextVariationPassword;
+        }
+    }
+
 }

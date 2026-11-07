@@ -55,6 +55,33 @@ namespace Omni
 	//									Reinstated checking for battery optimisation and allowing setting of it.
 	//									Record phone accelerometer and gyro data as requested by George Watson's
 	//									Add abiilty to share / transfer key settings via QR code
+	//			Nov-2026	K.Roberts	Improved determination of start location for improved lap counting
+	//									Added capture of low pass filtered accelerometer and gyroscope data from phone
+	//									- accel and gyro logged to CSV file
+	//									- accel and gyro (opionally) uploaded to telemetery server
+	//									Added sending additional timestamped upload data packet at point when lap counter
+	//									is incremented - improves eChook live data lap times
+	//									Various fixes / refinements following code review:
+	//									- enable TLS certificate validation in UploadSender.cs - was previously disabled
+	//									  to support older phones with earlier Android with earlier versions of TLS
+	//									- all string settings / preferences are now stored encrypted
+	//									- upload passwords in share settings QR codes encrypted
+	//									- MainService now not exported, should never have been!
+	//									- tightened up file provider paths for exoprt of CSVs and Shared Settings QR codes
+	//									- no longer crashes when a permission is initially denied and then confirmed
+	//									- if importing perferences / settings from QR code, now stores correct upload target
+	//									- correctly handle empty password when importing preferences / settings from QR code
+	//									- fixed duplicate event subscriptions after going into background
+	//									- correct error in eChook bluetooth data frame parser 
+	//									- prevent concurrent upload requests if target server is slow / off-line
+	//									- corrected issue where camera QR scan was not activated after granting camera 
+	//									  permission; also maintain scanning when rotating device
+	//									- ensure all CSV log columns are populated when GPS data is missing
+	//									- ensure upload URLs include https:
+	//									- attempt to use secure bluetooth connection before falling back to insecure 
+	//									- connection
+	//									- added masked fields for entry of upload passwords
+	//									- plus many other small fixes / corrections to make code more robust
     //
     //=======================================================================================================================
 
@@ -95,6 +122,10 @@ namespace Omni
             MainServiceConnection = new ServiceConnection { Activity = this };
 
 			PermissionsHelper.Init(this);
+
+			EncryptionHelper.Init(Resources?.GetString(Resource.String.internal_encryption_key));
+
+			EncryptedPreferenceHelper.Init(PreferenceManager.GetDefaultSharedPreferences(this));
 
 			batteryOptimizationHelper = new BatteryOptimizationHelper { MainActivity = this };
 
@@ -231,27 +262,15 @@ namespace Omni
 			base.OnResume();
 			PreferenceManager.GetDefaultSharedPreferences(this)?.RegisterOnSharedPreferenceChangeListener(this);
 
-            // add data received event handler. First time round this is done when service service connection.onserviceconnected
-            if (MainServiceConnection is not null && MainServiceConnection.Binder is not null)
-			{
-				MainServiceConnection.Binder.OnDataReceived += Binder_OnDataReceived;
-				MainServiceConnection.Binder.OnDataUploaded += Binder_OnDataUploaded;
-			}
+            // add data received event handler. First time round this is done when service connection.onserviceconnected
+			MainServiceConnection?.AttachBinderHandlers(this);
 		}
 
 		protected override void OnPause()
 		{
 			Log.Info(TAG, "onPause.");
 
-			if (Bound)
-			{
-				try                             // try to remove event handler - may not yet be attached!
-				{
-					MainServiceConnection?.Binder?.OnDataReceived -= Binder_OnDataReceived;
-                    MainServiceConnection?.Binder?.OnDataUploaded -= Binder_OnDataUploaded;
-                }
-                catch (Java.Lang.Exception) { }
-			}
+			if (Bound) MainServiceConnection?.DetachBinderHandlers(this);
 
 			PreferenceManager.GetDefaultSharedPreferences(this)?.UnregisterOnSharedPreferenceChangeListener(this);
 			base.OnPause();
@@ -388,7 +407,7 @@ namespace Omni
 						}
 						else
                         {
-                            Uri? fileUri = FileProvider.GetUriForFile(ApplicationContext, Constants.FILE_PROVIDER_AUTHORITY, new Java.IO.File(Shared.LogFilePath));
+							Uri? fileUri = FileProvider.GetUriForFile(Application, Constants.FILE_PROVIDER_AUTHORITY, new Java.IO.File(Shared.LogFilePath));
 							if (fileUri != null)
 							{
                                 var alert = new AlertDialog.Builder(this);
@@ -397,7 +416,8 @@ namespace Omni
                                 .SetPositiveButton(GetString(Resource.String.dialog_share), (sender, args) =>
                                 {
                                     var shareIntent = new Intent(Intent.ActionSend);
-                                    shareIntent.SetType("text/csv");
+									//shareIntent.SetType("text/csv");
+									shareIntent.SetDataAndType(fileUri, ApplicationContext?.ContentResolver?.GetType(fileUri));
                                     shareIntent.PutExtra(Intent.ExtraStream, fileUri);
                                     shareIntent.AddFlags(Android.Content.ActivityFlags.GrantReadUriPermission);
 									var intent = Intent.CreateChooser(shareIntent, Resources?.GetString(Resource.String.dialog_share_logged_data));
@@ -438,7 +458,10 @@ namespace Omni
 							{
 								MainServiceConnection?.Binder?.Service?.CloseService();
                             }
-                            catch (DeadObjectException) { }		// ignore lost connection to service!
+                            catch (DeadObjectException ex)    // ignore lost connection to service!
+							{
+								Log.Info(TAG, $"Exception closing service, connection already lost: {ex}");
+							}
 							FinishAndRemoveTask();
 						});
 						alert.SetNegativeButton(GetString(Resource.String.dialog_cancel), (sender, args) =>
@@ -504,11 +527,10 @@ namespace Omni
 
 		private void UpdateKeepScreenOn()
 		{
-			var sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
-			if (sharedPreferences != null && Window != null)
+			if (Window != null)
 			{
-                bool keepScreenOn = sharedPreferences.GetBoolean(GetString(Resource.String.preference_key_keep_screen_on), false);
-                if (keepScreenOn)
+                bool? keepScreenOn = EncryptedPreferenceHelper.DataStore?.GetBoolean(GetString(Resource.String.preference_key_keep_screen_on), false);
+                if (keepScreenOn != null && keepScreenOn == true)
                     Window.AddFlags(WindowManagerFlags.KeepScreenOn);
                 else
                     Window.ClearFlags(WindowManagerFlags.KeepScreenOn);

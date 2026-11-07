@@ -1,0 +1,9 @@
+<Project>
+	<PropertyGroup>
+		<AndroidKeyStore>True</AndroidKeyStore>
+		<AndroidSigningKeyStore>omni.keystore</AndroidSigningKeyStore>
+		<AndroidSigningStorePass>(your keystore password)</AndroidSigningStorePass>
+		<AndroidSigningKeyAlias>(your signing key alias)</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>(your signing key password)</AndroidSigningKeyPass>
+	</PropertyGroup>
+</Project>

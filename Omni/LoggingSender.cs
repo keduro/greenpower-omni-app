@@ -17,6 +17,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using Java.Nio.Channels;
+
 namespace Omni
 {
     public class LoggingSender
@@ -39,22 +41,17 @@ namespace Omni
 
             if (Service != null)
             {
-                // GetExternalStoragePublicDirectory is obsolete in Android Q.
-                // var folder = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
-                // Now use GetExternalFilesDir which gives the files directory in the applications own file space, i.e. not public download folder
-                // also means no longer require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE permissions.
-                var folder = Service.GetExternalFilesDir(null)?.AbsolutePath;
-                folder ??= string.Empty;
-                var fileName = "Omni-Log-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".csv";
-                LogFilePath = Path.Combine(folder, fileName);
-                Shared.LogFilePath = LogFilePath;                       // also save in global shared to allow  use of 'share' from main activity
-                                                                        //WritePermissionGranted = false;
+                var logFileName = "Omni-Log-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".csv";
+                var exportPath = new Java.IO.File(Service.GetExternalFilesDir(null), "LoggedData");
+                if (!Directory.Exists(exportPath.AbsolutePath)) Directory.CreateDirectory(exportPath.AbsolutePath);
+                var fileExportPath = new Java.IO.File(exportPath, logFileName);
+                LogFilePath = fileExportPath.AbsolutePath;
+                Shared.LogFilePath = LogFilePath;                    // also save in global shared to allow  use of 'share' from main activity
+
                 HeadersOutput = false;
 
                 Timer = new Timer { Interval = Constants.LOGGING_INTERVAL, Enabled = false };
                 Timer.Elapsed += Timer_Elapsed;
-
-                var sharedPreferences = PreferenceManager.GetDefaultSharedPreferences(Service);
 
                 // Define what's included in the CSV file
 
@@ -63,11 +60,9 @@ namespace Omni
                 new C("Timestamp",            (now, location) => { return (now - new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc)).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture); }),
                 new C("DateTime (date)",      (now, location) => { return now.ToLocalTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture); }),
                 new C("DateTime (ms)",        (now, location) => { return now.ToLocalTime().ToString("fff", CultureInfo.InvariantCulture); }),
-                new C("Vehicle name",         (now, location) => { if (sharedPreferences != null && Service.Resources != null) 
+                new C("Vehicle name",         (now, location) => { if (Service.Resources != null) 
                                                                    { 
-#pragma warning disable CS8603 // Possible null reference return.
-                                                                        return sharedPreferences?.GetString(Service.Resources.GetString(Resource.String.preference_key_car_name), "Car"); 
-#pragma warning restore CS8603 // Possible null reference return.
+                                                                        return EncryptedPreferenceHelper.DataStore?.GetString(Service.Resources.GetString(Resource.String.preference_key_car_name), "Car") ?? "Car"; 
                                                                    } else { 
                                                                         return "Car"; 
                                                                    } }),
@@ -75,7 +70,7 @@ namespace Omni
                 new C("RaceTime (s)",         typeof(int),    Constants.SHARED_DATA_ELAPSED_TIME_KEY, "0"),
                 new C("Speed (m/s)",          typeof(double), Constants.SHARED_DATA_SPEED_KEY, "0.00"),
                 new C("Speed (mph)",          typeof(double), Constants.SHARED_DATA_SPEED_KEY, Constants.MPS2MPH, "0.00"),
-                new C("GPS speed (m/s)",      (now, location) => { return location != null ? (location.HasSpeed ? location.Speed.ToString("0.00", CultureInfo.InvariantCulture) : "") : ""; }),
+                new C("GPS speed (m/s)",      (now, location) => { return location != null && location.HasSpeed ? location.Speed.ToString("0.00", CultureInfo.InvariantCulture) : String.Empty;  }),
                 new C("Distance (m)",         typeof(double), Constants.SHARED_DATA_DISTANCE_KEY, "0"),
                 new C("Distance (miles)",     typeof(double), Constants.SHARED_DATA_DISTANCE_KEY, Constants.M2MILES, "0.0"),
                 new C("Lap",                  typeof(int),    Constants.SHARED_DATA_LAP_KEY, "0"),
@@ -124,18 +119,18 @@ namespace Omni
             }
         }
 
-        internal class C(string Header, Type? Type, string? SharedDataKey, double Multiplier, string? Format, Func<DateTime, Location, string?>? OtherSource)
+        internal class C(string Header, Type? Type, string? SharedDataKey, double Multiplier, string? Format, Func<DateTime, Location?, string?>? OtherSource)
         {
             public string Header { get; } = Header;
             public Type? Type { get; } = Type;
             public string? SharedDataKey { get; } = SharedDataKey;
             public double Multiplier { get; } = Multiplier;
             public string? Format { get; } = Format;
-            public Func<DateTime, Location, string?>? OtherSource { get; } = OtherSource;
+            public Func<DateTime, Location?, string?>? OtherSource { get; } = OtherSource;
 
             public C(string Header, Type Type, string SharedDataKey, string Format) : this(Header, Type, SharedDataKey, 1.0, Format, null) { }
             public C(string Header, Type Type, string SharedDataKey, double Multiplier, string Format) : this(Header, Type, SharedDataKey, Multiplier, Format, null) { }
-            public C(string Header, Func<DateTime, Location, string> OtherSource) : this(Header, null, null, 0.0, null, OtherSource) { }
+            public C(string Header, Func<DateTime, Location?, string?> OtherSource) : this(Header, null, null, 0.0, null, OtherSource) { }
         }
 
         private void OutputHeaders()
@@ -151,6 +146,7 @@ namespace Omni
                 if (i != csv.Length - 1) sb.Append(',');
             }
             sb.Append(System.Environment.NewLine);
+
             File.AppendAllText(LogFilePath, sb.ToString());
         }
 
@@ -158,7 +154,7 @@ namespace Omni
         {
             if (csv == null || csv.Length == 0 || LogFilePath == null) return;
 
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.UtcNow;
             var location = LocationHelper.GetLocationFromBundle(Shared.Data, Constants.SHARED_DATA_LOCATION_KEY);
             var sb = new System.Text.StringBuilder();
             for (int i=0; i < csv.Length; i++)
@@ -166,7 +162,7 @@ namespace Omni
                 var c = csv[i];
                 if (c.OtherSource != null)
                 {
-                    if (location != null) sb.Append(c.OtherSource(now, location));
+                    sb.Append(c.OtherSource(now, location) ?? string.Empty);
                 }
                 else if (c.Type == typeof(int))
                 {
@@ -209,11 +205,6 @@ namespace Omni
 
         private  void Timer_Elapsed(object? sender, ElapsedEventArgs? e)
         {
-            //if (!WritePermissionGranted)            // need to check this as timer may elapse a number of times before user confirms write permission
-            //{
-            //    WritePermissionGranted = ContextCompat.CheckSelfPermission(Service, Manifest.Permission.WriteExternalStorage) == PermissionChecker.PermissionGranted;
-            //    if (!WritePermissionGranted) return;
-            //}
             if (!HeadersOutput)
             {
                 OutputHeaders();

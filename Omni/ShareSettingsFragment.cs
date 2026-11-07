@@ -24,6 +24,8 @@ namespace Omni
 {
     internal class ShareSettingsFragment : Fragment, IFragmentServiceUpdates
     {
+        static readonly string TAG = typeof(ShareSettingsFragment).FullName ?? "ShareSettingsFragment";
+
         TextView? shareSettingsText;
         ImageView? QRcodeImageView;
         SurfaceView? scanSurfaceView;
@@ -32,7 +34,8 @@ namespace Omni
         Button? cancelScanQRcodeButton;
 
         string scannedBarcode = string.Empty;
-        bool savedIsScanning = false;
+        static bool savedIsScanning = false;        // static to ensure saved across orientation changes
+                                                    // that may result in OnCreateView being called twice
 
         public override void OnCreate(Bundle? savedInstanceState)
         {
@@ -72,38 +75,31 @@ namespace Omni
             scanQRcodeButton = view?.FindViewById<Button>(Resource.Id.scanQRcode_button);
             scanQRcodeButton?.Click += (sender, e) =>
             {
-                StartScanningQRcode(Context, scanSurfaceView, Looper.MyLooper());
-                UpdateUI(QRcodeHelper.IsScanning);
+                StartScanningQRcode(scanSurfaceView);
             };
 
             cancelScanQRcodeButton = view?.FindViewById<Button>(Resource.Id.cancelScanQRcode_button);
             cancelScanQRcodeButton?.Click += (sender, e) =>
             {
                 StopScanningQRcode();
-                UpdateUI(QRcodeHelper.IsScanning);
             };
+
+            UpdateUI(false);
 
             if (savedIsScanning)
             {
-                StartScanningQRcode(Context, scanSurfaceView, Looper.MyLooper());
+                StartScanningQRcode(scanSurfaceView);
             }
-
-            UpdateUI(QRcodeHelper.IsScanning);
 
             return view;
         }
 
-        public override void OnPause()
-        {
-            base.OnPause();
-            savedIsScanning = QRcodeHelper.IsScanning;
-            QRcodeHelper.StopScanQRcode();
-        }
-
         public override void OnSaveInstanceState(Bundle outState)
         {
-            base.OnSaveInstanceState(outState);
+            savedIsScanning = QRcodeHelper.IsScanning;
+            StopScanningQRcode();
             outState.PutBoolean(Constants.SCANNING_QR_CODE, savedIsScanning);
+            base.OnSaveInstanceState(outState);
         }
 
         private void UpdateUI(bool isScanning)
@@ -126,26 +122,23 @@ namespace Omni
             }
         }
 
-        private void StartScanningQRcode(Context? context, SurfaceView? scanSurfaceView, Looper? looper)
+        private void StartScanningQRcode(SurfaceView? scanSurfaceView)
         {
-            QRcodeHelper.StartScanQRcode(context, scanSurfaceView, looper, (barCode) =>
+            QRcodeHelper.StartScanQRcode(Context, scanSurfaceView, Looper.MyLooper(), (barCode) =>
             {
                 CheckAndAcceptBarcode(barCode);
-            });
+            }, UpdateUI);
         }
 
         private void StopScanningQRcode()
         {
-            QRcodeHelper.StopScanQRcode();
-
-            UpdateUI(QRcodeHelper.IsScanning);
+            QRcodeHelper.StopScanQRcode(UpdateUI);
         }
 
         private Bitmap? CreateQRCode()
         {
-            var preferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
-            var carName = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_car_name), string.Empty);
-            var uploadTo = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload), string.Empty);
+            var carName = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_car_name), string.Empty);
+            var uploadTo = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_upload), string.Empty);
 
             var uploadToBanchoryGreenpower = (uploadTo == Resources?.GetString(Resource.String.preference_option_upload_banchory_greenpower));
             var uploadToEchookLiveData = (uploadTo == Resources?.GetString(Resource.String.preference_option_upload_echook_live_data));
@@ -155,30 +148,29 @@ namespace Omni
             var username = string.Empty;
             var password = string.Empty;
 
+            var preferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
+
             if (uploadToBanchoryGreenpower)
             {
                 url = Resources?.GetString(Resource.String.upload_banchory_greenpower_url);
-                telemetryCarName = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_car_name), string.Empty);
+                telemetryCarName = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_car_name), string.Empty);
                 username = telemetryCarName;
                 password = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_password), string.Empty);
             }
             else if (uploadToEchookLiveData)
             {
                 url = Resources?.GetString(Resource.String.upload_echook_live_data_send_url);
-                telemetryCarName = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_car_name), string.Empty);
+                telemetryCarName = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_car_name), string.Empty);
                 username = telemetryCarName;
                 password = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_password), string.Empty);
             }
             else if (uploadToUserDefined)
             {
-                url = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_url), string.Empty);
-                telemetryCarName = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_car_name), string.Empty);
-                username = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_username), string.Empty);
+                url = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_url), string.Empty);
+                telemetryCarName = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_car_name), string.Empty);
+                username = EncryptedPreferenceHelper.DataStore?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_username), string.Empty);
                 password = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_password), string.Empty);
             }
-
-            if (!string.IsNullOrEmpty(password))
-                password = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
 
             var sb = new StringBuilder();
             sb.AppendLine("[OMNI]");
@@ -201,15 +193,15 @@ namespace Omni
             if (barCode.Equals(scannedBarcode)) return;     // to avoid reprocessing the same barcode being 
             scannedBarcode = barCode;                       // repeatedly scanned
 
-            var password = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(lines[6]));
+            var passwordMessage = (!string.IsNullOrWhiteSpace(lines[6]) ? "(Password is set)" : "(Password not set)");
 
             var sb = new StringBuilder();
-            sb.AppendLine($"{Resource.String.preference_title_car_name}: {lines[1]}");
-            sb.AppendLine($"{Resource.String.preference_title_upload_target}: {lines[2]}");
-            sb.AppendLine($"{Resource.String.preference_dialog_upload_user_defined_car_name}: {lines[3]}");
-            sb.AppendLine($"{Resource.String.preference_dialog_upload_user_defined_url}: {lines[4]}");
-            sb.AppendLine($"{Resource.String.preference_dialog_upload_user_defined_username}: {lines[5]}");
-            sb.AppendLine($"{Resource.String.preference_dialog_upload_user_defined_password}: {password}");
+            sb.AppendLine($"{Resources.GetString(Resource.String.preference_title_car_name)}: {lines[1]}");
+            sb.AppendLine($"{Resources.GetString(Resource.String.preference_title_upload_target)}: {lines[2]}");
+            sb.AppendLine($"{Resources.GetString(Resource.String.preference_dialog_upload_user_defined_car_name)}: {lines[3]}");
+            sb.AppendLine($"{Resources.GetString(Resource.String.preference_dialog_upload_user_defined_url)}: {lines[4]}");
+            sb.AppendLine($"{Resources.GetString(Resource.String.preference_dialog_upload_user_defined_username)}: {lines[5]}");
+            sb.AppendLine($"{Resources.GetString(Resource.String.preference_dialog_upload_user_defined_password)}: {passwordMessage}");
 
             if (Context != null)
             {
@@ -225,57 +217,53 @@ namespace Omni
 
         private void UpdatePreferences(string[] barCodeLines)
         {
-            var preferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
-            var editor = preferences?.Edit();
-
             StopScanningQRcode();
 
-            if (editor != null && barCodeLines.Length >= 8)
+            if (barCodeLines.Length >= 8)
             {
-                var uploadTo = preferences?.GetString(Resources?.GetString(Resource.String.preference_key_upload), string.Empty);
+                var uploadTo = barCodeLines[2];
+                EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload), uploadTo);
 
                 var uploadToBanchoryGreenpower = (uploadTo == Resources?.GetString(Resource.String.preference_option_upload_banchory_greenpower));
                 var uploadToEchookLiveData = (uploadTo == Resources?.GetString(Resource.String.preference_option_upload_echook_live_data));
                 var uploadToUserDefined = (uploadTo == Resources?.GetString(Resource.String.preference_option_upload_user_defined));
 
-                string password = string.Empty;
-                if (!string.IsNullOrEmpty(barCodeLines[6]))
-                    password = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(barCodeLines[6]));
+                string? password = string.Empty;
+                string? encryptedPassword = barCodeLines[6]; 
+                if (!string.IsNullOrEmpty(encryptedPassword))
+                {
+                    try
+                    {
+                        password = EncryptionHelper.DecryptString(encryptedPassword);
+                    }
+                    catch (Exception ex)       // If fail to decode password, simply leave as blank
+                    {
+                        Log.Info(TAG, $"Exception decrypting password from QR code, setting password to blank: {ex}");
+                    }
+                }
 
-                editor?.PutString(Resources?.GetString(Resource.String.preference_key_car_name), barCodeLines[1]);
-                editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload), barCodeLines[2]);
+                EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_car_name), barCodeLines[1]);
 
                 if (uploadToBanchoryGreenpower)
                 {
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_car_name), barCodeLines[3]);
-                    editor?.PutString(Resources?.GetString(Resource.String.upload_banchory_greenpower_url), barCodeLines[4]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_car_name), barCodeLines[5]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_password), password);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_car_name), barCodeLines[3]);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_banchory_greenpower_password), password);
                 }
                 else if (uploadToEchookLiveData)
                 {
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_car_name), barCodeLines[3]);
-                    editor?.PutString(Resources?.GetString(Resource.String.upload_echook_live_data_send_url), barCodeLines[4]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_car_name), barCodeLines[5]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_password), password);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_car_name), barCodeLines[3]);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_echook_live_data_password), password);
                 }
                 else if (uploadToUserDefined)
                 {
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_car_name), barCodeLines[3]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_url), barCodeLines[4]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_username), barCodeLines[5]);
-                    editor?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_password), password);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_car_name), barCodeLines[3]);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_url), barCodeLines[4]);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_username), barCodeLines[5]);
+                    EncryptedPreferenceHelper.DataStore?.PutString(Resources?.GetString(Resource.String.preference_key_upload_user_defined_password), password);
                 }
 
-                var committed = editor?.Commit() ?? false;
-                if (committed)
-                {
-                    // refresh the displayed QR code
-                    
-                    var bitmap = CreateQRCode();
-                    if (bitmap != null && QRcodeImageView != null) QRcodeImageView?.SetImageBitmap(bitmap);
-
-                }
+                var bitmap = CreateQRCode();
+                if (bitmap != null && QRcodeImageView != null) QRcodeImageView?.SetImageBitmap(bitmap);
             }
         }
     
@@ -283,14 +271,12 @@ namespace Omni
         {
             if (this.Context == null || bitmap == null) return;
 
-            if (Shared.QRcodePath == null)
-            {
-                var folder = Activity?.GetExternalFilesDir(null)?.AbsolutePath;
-                folder ??= string.Empty;
-                var fileName = "Omni-QRcode-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".png";
-                var qrCodePath = System.IO.Path.Combine(folder, fileName);
-                Shared.QRcodePath = qrCodePath;
-            }
+            var qrFileName = "Omni-QRcode-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".png";
+            var exportPath = new Java.IO.File(Context.GetExternalFilesDir(null), "QRCodes");
+            if (!Directory.Exists(exportPath.AbsolutePath)) Directory.CreateDirectory(exportPath.AbsolutePath);
+            var fileExportPath = new Java.IO.File(exportPath, qrFileName);
+            var qrCodePath = fileExportPath.AbsolutePath;
+            Shared.QRcodePath = qrCodePath;
 
             try
             {
@@ -320,9 +306,9 @@ namespace Omni
                     alert.Create().Show();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Log.Info(TAG, $"Exception sharing QR code bitmap: {ex}");
             }
         }
     }

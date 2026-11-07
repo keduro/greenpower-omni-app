@@ -21,38 +21,61 @@ namespace Omni
 {
     public class ServiceConnection : Java.Lang.Object, IServiceConnection
     {
+        static readonly string TAG = typeof(ServiceConnection).FullName ?? "ServiceConnection";
+
         public MainActivity? Activity { get; set; }
 
         public ServiceBinder? Binder { get; set; }
 
         public void OnServiceConnected(ComponentName? name, IBinder? service)
         {
-            ServiceBinder? binder = (ServiceBinder?)service;
+            var binder = service as ServiceBinder;
             this.Binder = binder;
-            if (Activity != null)
+
+            AttachBinderHandlers(Activity);
+
+            Activity?.Bound = true;
+
+            try
             {
-                binder?.OnDataReceived += Activity.Binder_OnDataReceived;
-                binder?.OnDataUploaded += Activity.Binder_OnDataUploaded;
-                Activity.Bound = true;
-                if (!BluetoothHelper.CheckBluetooth(Activity))
-                {
-                    BluetoothHelper.RequestBluetooth(Activity);
-                }
-                else
-                {
-                    try
-                    {
-                        Binder?.Service?.IsBound = true;
-                        Binder?.Service?.Start();
-                    }
-                    catch (DeadObjectException) { }     // ignore lost connection to service!
-                }
+                binder?.Service?.IsBound = true;
+                binder?.Service?.Start();
+            }
+            catch (DeadObjectException ex) 
+            {
+                Log.Info(TAG, $"Exception starting service connection: {ex}");
+            }
+
+            if (Activity != null && !BluetoothHelper.CheckBluetooth(Activity))
+            {
+                BluetoothHelper.RequestBluetooth(Activity);
             }
         }
 
         public void OnServiceDisconnected(ComponentName? name)
         {
             Activity?.Bound = false;
+            DetachBinderHandlers(Activity);
+            Binder = null;
+        }
+
+        public void AttachBinderHandlers(MainActivity? MainActivity)
+        {
+            if (MainActivity == null || Binder == null) return;
+
+            Binder?.OnDataReceived -= MainActivity.Binder_OnDataReceived;
+            Binder?.OnDataUploaded -= MainActivity.Binder_OnDataUploaded;
+
+            Binder?.OnDataReceived += MainActivity.Binder_OnDataReceived;
+            Binder?.OnDataUploaded += MainActivity.Binder_OnDataUploaded;
+        }
+
+        public void DetachBinderHandlers(MainActivity? MainActivity)
+        {
+            if (MainActivity == null || Binder == null) return;
+
+            Binder?.OnDataReceived -= MainActivity.Binder_OnDataReceived;
+            Binder?.OnDataUploaded -= MainActivity.Binder_OnDataUploaded;
         }
     }
 }

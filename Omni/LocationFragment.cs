@@ -113,7 +113,10 @@ namespace Omni
                     }
                 }
             }
-            catch (System.Exception) { }
+            catch (System.Exception ex) 
+            {
+                Log.Info(TAG, $"Exception while drawing accuracy circle: {ex}");
+            }
         }
 
         private void MapTypeButton_Click(object? sender, EventArgs? e)

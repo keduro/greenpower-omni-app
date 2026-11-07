@@ -152,11 +152,15 @@ namespace Omni
         {
             Log.Info(TAG, $"CheckPermissionRationaleRequired {Permission}.");
 
-            var rationaleRequired = false;
+            bool rationaleRequired;
             var granted = CheckPermission(Permission);
             if (!granted)
             {
-                rationaleRequired = CheckPermissionRationaleRequired(Permission);
+                rationaleRequired = (mainActivity != null && mainActivity.ShouldShowRequestPermissionRationale(Permission));
+            }
+            else
+            {
+                rationaleRequired = false;
             }
 
             Log.Info(TAG, $"CheckPermissionRationaleRequired {Permission} rationale required: {rationaleRequired}");

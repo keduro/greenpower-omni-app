@@ -41,5 +41,6 @@ namespace Omni
 		{
 			OnDataUploaded?.Invoke();
 		}
+
 	}
 }

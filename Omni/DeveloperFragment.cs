@@ -21,6 +21,8 @@ namespace Omni
 {
     public class DeveloperFragment : Fragment, IFragmentServiceUpdates
     {
+        static readonly string TAG = typeof(DashboardFragment).FullName ?? "DashboardFragment";
+
         public void OnCreatePreferences(Bundle? savedInstanceState, string? rootKey)
         {
             throw new NotImplementedException();
@@ -56,7 +58,10 @@ namespace Omni
                         break;
                 }
             }
-            catch (DeadObjectException) { }     // ignore lost connection to service
+            catch (DeadObjectException ex)
+            {
+                Log.Info(TAG, $"Exception setting state as connetion to service lost: {ex}");
+            }
         }
 
     }

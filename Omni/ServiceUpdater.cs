@@ -20,16 +20,10 @@
 
 namespace Omni
 {
-    public class ServiceUpdater
+    public class ServiceUpdater(Looper? Looper, Action<Intent>? OnUpdate)
     {
-        readonly Action<Intent>? onUpdate;
-        readonly Handler? handler;
-
-        public ServiceUpdater(Looper? Looper, Action<Intent>? OnUpdate)
-        {
-            onUpdate = OnUpdate;
-            handler = HandlerCompat.CreateAsync(Looper);
-        }
+        readonly Action<Intent>? onUpdate = OnUpdate;
+        readonly Handler? handler = HandlerCompat.CreateAsync(Looper);
 
         public void Post(Intent? Intent)
         {

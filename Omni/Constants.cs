@@ -65,8 +65,8 @@ namespace Omni
 
         public const string SIMULATION_NAME = "simulation";
         public const string SCANNING_QR_CODE = "scanning_qr_code";
-
-        public const string FILE_PROVIDER_AUTHORITY = "net.keduro.omni.provider";
+        
+        public const string FILE_PROVIDER_AUTHORITY = "net.keduro.omni.fileprovider";
 
         // shared data keys for data from eChook bluetooth listener
 

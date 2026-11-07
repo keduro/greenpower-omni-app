@@ -359,5 +359,6 @@
 	<string name="snackbar_lap_counting_started">Début du comptage des tours</string>
 	<string name="snackbar_demonstration">Démonstration utilisant les données enregistrées</string>
 	<string name="snackbar_go">Go</string>
-	
+	<string name="snackbar_upload_https">Url de téléchargement invalide – doit être une url valide commençant par https://</string>
+
 </resources>

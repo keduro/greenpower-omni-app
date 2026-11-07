@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="28" android:versionName="Latest beta release" package="net.keduro.omni" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="29" android:versionName="Latest beta release" package="net.keduro.omni" android:installLocation="auto">
 	<!-- Google Maps for Android v2 requires OpenGL ES v2 -->
 	<uses-feature android:glEsVersion="0x00020000" android:required="true" />
 	<!-- Permission to receive remote notifications from Google Play Services -->
@@ -40,8 +40,7 @@
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 	<uses-permission android:name="android.permission.CAMERA" />
-	<!--<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />-->
-	<application android:allowBackup="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme">
+	<application android:allowBackup="false" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme">
 		<!-- Following are not required as long as specified as properties of the activity/service in the code
 		<activity android:name="net.keduro.omni.mainactivity" android:theme="@style/AppTheme"></activity>
 		<activity android:name="net.keduro.omni.splashactivity" android:theme="@style/AppTheme.Splash"></activity>
@@ -57,13 +56,19 @@
 		<meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="barcode" />
 		<!-- Necessary for apps that target Android 9.0 or higher -->
 		<!-- <uses-library android:name="org.apache.http.legacy" android:required="false" /> -->
-		<provider android:name="androidx.core.content.FileProvider" android:authorities="net.keduro.omni.provider" android:exported="false" android:grantUriPermissions="true">
-			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
+		<provider 
+			android:name="androidx.core.content.FileProvider" 
+			android:authorities="net.keduro.omni.fileprovider" 
+			android:exported="false" 
+			android:grantUriPermissions="true">
+			<meta-data 
+				android:name="android.support.FILE_PROVIDER_PATHS" 
+				android:resource="@xml/provider_paths" />
 		</provider>
 	</application>
 	<uses-feature android:name="android.hardware.location" android:required="false" />
 	<uses-feature android:name="android.hardware.location.gps" android:required="false" />
 	<uses-feature android:name="android.hardware.location.network" android:required="false" />
-	<uses-feature android:name="android.hardware.camera" android:required="true" />
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
 	<uses-feature android:name="android.hardware.camera.autofocus" />
 </manifest>

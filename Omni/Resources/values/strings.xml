@@ -372,5 +372,6 @@
 	<string name="snackbar_lap_counting_started">Lap counting started</string>
 	<string name="snackbar_demonstration">Demonstration using recorded data</string>
 	<string name="snackbar_go">Go</string>
+	<string name="snackbar_upload_https">Invalid upload Url - must be a valid url starting with https://</string>
 	
 </resources>

@@ -47,8 +47,8 @@ namespace Omni
                 }
                 return;
             }
-            AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
-            AlertDialog alert = dialog.Create();
+            var dialog = new AlertDialog.Builder(activity);
+            var alert = dialog.Create();
             alert.SetTitle("Enable Bluetooth");
             alert.SetMessage("Bluetooth is needed for correct operation and is currently disabled");
             alert.SetButton((int)DialogButtonType.Positive, "Enable", (c, ev) =>

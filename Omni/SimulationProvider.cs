@@ -30,6 +30,7 @@ namespace Omni
 
         readonly ServiceUpdater serviceUpdater;
 
+        bool isStarted = false;                                 // keep track of whether started or not
         readonly List<double[]> data = [];                      // the data!
         int dataIndex;                                          // index of the last row of data provided
         Location? previousLocation = null;                      // previous location - only send updated locations
@@ -55,6 +56,12 @@ namespace Omni
         public void Start()
         {
             Log.Info(TAG, "Starting simulation provider timer");
+
+            if (isStarted) return;
+
+            data.Clear();
+            previousLocation = null;
+            addressLocation = null;
 
             // read the data in from the csv file
 
@@ -85,6 +92,8 @@ namespace Omni
             timer.Interval = 250.0;
             timer.Start();
 
+            isStarted = true;
+
             // set the lapcounter state 
 
             Service.SetState(State.Running);
@@ -94,6 +103,7 @@ namespace Omni
         {
             Log.Info(TAG, "Stopping simulation provider timer");
             timer.Stop();
+            isStarted = false;
         }
 
         private async void Timer_Elapsed(object? sender, ElapsedEventArgs? e)

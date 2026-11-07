@@ -359,5 +359,6 @@
 	<string name="snackbar_lap_counting_started">Conteo de vueltas iniciado</string>
 	<string name="snackbar_demonstration">Demostración usando datos grabados</string>
 	<string name="snackbar_go">Ir</string>
-	
+	<string name="snackbar_upload_https">Url de carga no válida: debe ser una url válida que comience por https://</string>
+
 </resources>

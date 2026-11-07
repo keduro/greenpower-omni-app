@@ -369,5 +369,6 @@
 	<string name="snackbar_lap_counting_started">Rondetelling gestart</string>
 	<string name="snackbar_demonstration">Demonstratie met opgenomen gegevens</string>
 	<string name="snackbar_go">Start</string>
-	
+	<string name="snackbar_upload_https">Ongeldige upload-url – moet een geldige url zijn die begint met https://</string>
+
 </resources>

@@ -63,9 +63,12 @@ namespace Omni
 				if (result.Locations.Any())
 				{
 					var location = result.Locations.First();
+#if DEBUG
 					Log.Info(TAG, "OnLocationResult: new location available: " + location);
-
-					if ((location.Latitude!=0) && (location.Longitude!=0) && LocationListener != null)
+#else
+					Log.Info(TAG, "OnLocationResult: location updated");
+#endif
+                    if ((location.Latitude!=0) && (location.Longitude!=0) && LocationListener != null)
 					{
 						// broadcast location to the main service
 						Intent locationIntent = new(Constants.LOCATION_DATA_BROADCAST_ACTION);

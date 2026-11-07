@@ -31,6 +31,8 @@ namespace Omni
 {
     public static class QRcodeHelper
     {
+        static readonly string TAG = typeof(QRcodeHelper).FullName ?? "QRcodeHelper";
+
         private static BarcodeDetector? barcodeDetector;
         private static CameraSource? cameraSource;
 
@@ -48,17 +50,22 @@ namespace Omni
             return bitmap;
         }
 
-        public static void StartScanQRcode(Context? context, SurfaceView? scanSurfaceView, Looper? looper, Action<string>? barCodeAction)
+        public static void StartScanQRcode(Context? context, SurfaceView? scanSurfaceView, Looper? looper, Action<string>? barCodeAction, Action<bool> UIUpdater)
         {
             IsScanning = false;
+            UIUpdater(false);
 
             if (context == null || scanSurfaceView == null || looper == null) return;
 
-            if (!PermissionsHelper.CheckPermissions(PermissionsHelper.CameraPermissions))           // check camera permission
+            if (!PermissionsHelper.CheckPermissions(PermissionsHelper.CameraPermissions))           // check camera if don't have camera permission
             {
                 PermissionsHelper.RequestPermission(Manifest.Permission.Camera, () =>               // request permission if don't already have it
                 {
-                    if (!PermissionsHelper.CheckPermission(Manifest.Permission.Camera))             // check again after request made
+                    if (PermissionsHelper.CheckPermissions(PermissionsHelper.CameraPermissions))    // check again after request made
+                    {
+                        StartScan(context, scanSurfaceView, looper, barCodeAction, UIUpdater);
+                    }
+                    else                                                                            
                     {
                         var permissionText = Resource.String.share_settings_permission_rationale;
                         var alert = new AlertDialog.Builder(context);
@@ -71,13 +78,14 @@ namespace Omni
             }
             else
             {
-                StartScan(context, scanSurfaceView, looper, barCodeAction);
+                StartScan(context, scanSurfaceView, looper, barCodeAction, UIUpdater);
             }
         }
 
-        private static void StartScan(Context? context, SurfaceView? scanSurfaceView, Looper? looper, Action<string>? barCodeAction)
+        private static void StartScan(Context? context, SurfaceView? scanSurfaceView, Looper? looper, Action<string>? barCodeAction, Action<bool> UIUpdater)
         {
             IsScanning = false;
+            UIUpdater(false);
 
             if (context == null || scanSurfaceView == null || looper == null) return;
 
@@ -102,7 +110,11 @@ namespace Omni
                     }
                     catch (Exception ex)
                     {
-                        if (ex != null) throw;
+                        if (ex != null)
+                        {
+                            Log.Info(TAG, $"Exception starting camera scan: {ex}");
+                            return;
+                        }
                     }
                 }));
 
@@ -115,19 +127,23 @@ namespace Omni
                     }
                 }));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Info(TAG, $"Exception starting camera scan: {ex}");
                 IsScanning = false;
+                UIUpdater(false);
                 return;
             }
 
             IsScanning = true;
+            UIUpdater(true);
         }
 
-        public static void StopScanQRcode()
+        public static void StopScanQRcode(Action<bool> UIUpdater)
         {
             cameraSource?.Stop();
             IsScanning = false;
+            UIUpdater(false);
         }
 
     }

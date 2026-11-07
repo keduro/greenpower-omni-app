@@ -11,12 +11,13 @@
 *.user
 
 # Keystore for signing app
+/Omni/Omni.Signing.props
 *.keystore
 
-# Secrets file containing Google aps API key
-[Rr]esources/values/secrets.xml
+# Secrets file containing Google aps API key and internal encryption key
+/Omni/Resources/values/secrets.xml
 
 # About files
 About*.txt
 
-/Omni/Resources/values/secrets.xml
+

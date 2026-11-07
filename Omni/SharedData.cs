@@ -81,7 +81,7 @@ namespace Omni
         public static Bundle Data = new();
 
         public static bool FirstRun { get; set; } = true;
-        public static string? LogFilePath { get; set; } = null;
+        public static string? LogFilePath { get; set; } = null;   //KR        
         public static string? QRcodePath { get; set; } = null;  
     }
 }

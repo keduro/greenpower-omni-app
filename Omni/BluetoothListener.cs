@@ -41,36 +41,54 @@ namespace Omni
         public void Start()
         {
             Log.Info(TAG, "Starting bluetooth listener");
-            IsStarted = true;
 
-            if (!BluetoothHelper.CheckBluetooth(Service)) return;               // return if bluetooth not enabled (should have been enabled in main activity
+            if (!BluetoothHelper.CheckBluetooth(Service)) return;           // return if bluetooth not enabled (should have been enabled in main activity)
+            if (IsStarted) return;                                          // return if already started
 
             var Resources = Service.Resources;
-            var preferences = PreferenceManager.GetDefaultSharedPreferences(Service);
+            if (Resources is null) return;
 
-            if (Resources is null || preferences is null) return;
-
-            BluetoothDevice = preferences.GetString(Resources.GetString(Resource.String.preference_key_bluetooth_device), "");
+            BluetoothDevice = EncryptedPreferenceHelper.DataStore?.GetString(Resources.GetString(Resource.String.preference_key_bluetooth_device), "");
             if (string.IsNullOrWhiteSpace(BluetoothDevice)) return;			// return if no device specificied
+
+            try
+            {
+                CancellationTokenSource?.Cancel();                          // cancel bluetooth ListenerTask if already running
+            }
+            catch (Exception ex)
+            {
+                Log.Info(TAG, $"Exception canceling bluetooth listener: {ex}");
+            }
 
             CancellationTokenSource = new CancellationTokenSource();
 
-            if (ListenerTask != null && !ListenerTask.IsCompleted) ListenerTask.Wait();
-
             ListenerTask = Task.Run(async () => await RequestBluetoothDataAsync(CancellationTokenSource), CancellationTokenSource.Token);
+
+            IsStarted = true;
         }
 
         public void Stop()
         {
             Log.Info(TAG, "Stopping bluetooth listener");
-            IsStarted = false;
 
-            CancellationTokenSource?.Cancel();
+            if (!IsStarted) return;                                         // return if not already started
+
+            try
+            {
+                CancellationTokenSource?.Cancel();                          // cancel bluetooth ListenerTask if already running
+            }
+            catch (Exception ex)
+            {
+                Log.Info(TAG, $"Exception canceling bluetooth listener: {ex}");
+            }
+
+            IsStarted = false;
         }
 
         private async Task RequestBluetoothDataAsync(CancellationTokenSource cts)
         {
             BluetoothSocket? socket = null;
+            CancellationTokenRegistration cancellationRegistration = default;
             try
             {
                 while (!cts.IsCancellationRequested)
@@ -87,6 +105,12 @@ namespace Omni
                         }
                     }
                     BroadcastBluetoothStatus(socket != null);
+
+                    if (socket != null)
+                    {
+                        cancellationRegistration = cts.Token.Register(() => CloseBluetoothSocket(socket));   // force socket input stream to close on cancellation.
+                    }
+
                     // get here when socket is open
                     // now read data from the socket
                     var eChookBuffer = new EChookBuffer();
@@ -101,11 +125,14 @@ namespace Omni
                         }
                         if (!echookData.IsEmpty)
                         {
+                            //Log.Info(TAG, "Request bluetooth data: data received from eChook");
+
                             Intent intent = new(Constants.BLUETOOTH_DATA_BROADCAST_ACTION);
                             intent.PutExtra("data", echookData);
-                            serviceUpdater.Post(intent);
+                            serviceUpdater.Post(intent);           
                         }
                     }
+                    cancellationRegistration.Dispose();
                     BroadcastBluetoothStatus(socket != null);
                 }
                 BroadcastBluetoothStatus(false);
@@ -137,7 +164,7 @@ namespace Omni
             if (bluetoothAdapter.BondedDevices is null) return null;                        // return if no bonded devices
             foreach (var bondedDevice in bluetoothAdapter.BondedDevices)
             {
-                if (bondedDevice.Name is not null && BluetoothDevice is not null && bondedDevice.Name.ToUpper().Contains(BluetoothDevice.ToUpper(), StringComparison.CurrentCulture))
+                if (bondedDevice.Name != null && BluetoothDevice != null && bondedDevice.Name.ToUpper().Equals(BluetoothDevice.ToUpper(), StringComparison.CurrentCulture))
                 {
                     bluetoothDevice = bondedDevice;
                     break;
@@ -149,10 +176,20 @@ namespace Omni
             {
                 UUID? uuid = UUID.FromString("00001101-0000-1000-8000-00805f9b34fb");
                 if (uuid is not null)
-                    bluetoothSocket = bluetoothDevice.CreateInsecureRfcommSocketToServiceRecord(uuid);
-                if (bluetoothSocket == null) return null;                                   // return if unable to create socket
-
-                await bluetoothSocket.ConnectAsync();
+                {
+                    try
+                    {                                                                                       // try to make a secure (encrypted)
+                        bluetoothSocket = bluetoothDevice.CreateRfcommSocketToServiceRecord(uuid);          // socket connection first
+                        if (bluetoothSocket != null) await bluetoothSocket.ConnectAsync();
+                    }
+                    catch
+                    {                                                                                       // if can't make a secure socket connection
+                        bluetoothSocket?.Close();                                                           // fall back to making an insecure socket
+                        bluetoothSocket = bluetoothDevice.CreateInsecureRfcommSocketToServiceRecord(uuid);  // connection (as typically required by HC-05)
+                        if (bluetoothSocket != null) await bluetoothSocket.ConnectAsync();
+                    }
+                }
+                if (bluetoothSocket == null) return null;
 
                 if (!bluetoothSocket.IsConnected) return null;                              // return if unable to connect 
             }
@@ -183,8 +220,6 @@ namespace Omni
 
             if (socket == null || !socket.IsConnected) return null;
 
-            cts.Token.Register(() => CloseBluetoothSocket(socket));   // force socket input stream to close on cancellation.
-
             try
             {
                 int receivedCount;
@@ -200,7 +235,7 @@ namespace Omni
                 while (!done)
                 {
                     int ix = 0;
-                    while ((eChookBuffer.ReceivedBytes[ix] != '{') && (ix < eChookBuffer.BytesLeft)) ix++;
+                    while ((ix < eChookBuffer.BytesLeft) && (eChookBuffer.ReceivedBytes[ix] != '{')) ix++;
                     if (ix >= eChookBuffer.BytesLeft)
                     {
                         eChookBuffer.Offset = eChookBuffer.BytesLeft;
@@ -214,7 +249,7 @@ namespace Omni
                             Array.Copy(eChookBuffer.ReceivedBytes, ix, eChookBuffer.ReceivedBytes, 0, eChookBuffer.BytesLeft);
                             ix = 0;
                         }
-                        while ((eChookBuffer.ReceivedBytes[ix] != '}') && (ix < eChookBuffer.BytesLeft)) ix++;
+                        while ((ix < eChookBuffer.BytesLeft) && (eChookBuffer.ReceivedBytes[ix] != '}')) ix++;
                         if (ix >= eChookBuffer.BytesLeft)
                         {
                             eChookBuffer.Offset = eChookBuffer.BytesLeft;
@@ -224,7 +259,7 @@ namespace Omni
                         {
                             if (ix == 4)
                             {
-                                if (eChookBuffer.TryParseEChookData(eChookBuffer.ReceivedBytes[2], eChookBuffer.ReceivedBytes[3], out double data))
+                                if (EChookBuffer.TryParseEChookData(eChookBuffer.ReceivedBytes[2], eChookBuffer.ReceivedBytes[3], out double data))
                                 {
                                     string key = Convert.ToChar(eChookBuffer.ReceivedBytes[1]).ToString();
                                     readData.PutDouble(key, data);
@@ -257,7 +292,7 @@ namespace Omni
                 Offset = 0;
                 BytesLeft = 0;
             }
-            public bool TryParseEChookData(byte b1, byte b2, out double value)
+            public static bool TryParseEChookData(byte b1, byte b2, out double value)
             {
                 value = 0.0F;
                 try

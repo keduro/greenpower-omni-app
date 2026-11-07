@@ -47,7 +47,8 @@ namespace Omni
             Log.Info(TAG, "OnCreateView.");
 
             int layoutResourceId = Resource.Layout.dashboard0_fragment;
-            _ = int.TryParse(this.Tag, out layoutResourceId);                   // get layout from the fragment tag, set in mainactivity.cs
+            if (int.TryParse(this.Tag, out var parsedTag)) layoutResourceId = parsedTag;    // get layout from the fragment tag, set in mainactivity.cs
+
 
             View? view = inflater.Inflate(layoutResourceId, container, false) ?? throw new Exception("Exception inflating dashboard fragment view");
 
@@ -98,7 +99,7 @@ namespace Omni
                 new P(view, Resource.Id.customdataytextview,      0, typeof(double), Constants.SHARED_DATA_CUSTOM_DATA_Y_KEY,       1, "0.0", null, null),
                 new P(view, Resource.Id.customdataztextview,      0, typeof(double), Constants.SHARED_DATA_CUSTOM_DATA_Z_KEY,       1, "0.0", null, null),
                 new P(view, Resource.Id.ahtextview,               0, typeof(double), Constants.SHARED_DATA_AS_KEY,                  Constants.AS2AH,        "0.0", null, null),   // convert from ampseconds to display as Ah
-                new P(view, Resource.Id.kjtextview,               0, typeof(double), Constants.SHARED_DATA_J_KEY,                   0.001,                  "0",   null, null),   // convert from joules to display as Wh
+                new P(view, Resource.Id.kjtextview,               0, typeof(double), Constants.SHARED_DATA_J_KEY,                   0.001,                  "0",   null, null),   // convert from joules to display as kJ
                 new P(view, Resource.Id.efficiencyatextview,      0, typeof(double), Constants.SHARED_DATA_EFFICIENCY_ASPM_KEY,     Constants.ASPM2AHPMILE, "0.0", null, null),   // convert from ampseconds per meter to display as amphours per mile
                 new P(view, Resource.Id.efficiencyjtextview,      0, typeof(double), Constants.SHARED_DATA_EFFICIENCY_JPM_KEY,      Constants.JPM2KJPMILE,  "0.0", null, null),   // convert from joules per meter to watthours per mile
                 new P(view, Resource.Id.elapsedtimetextview2,     0, typeof(int),    Constants.SHARED_DATA_ELAPSED_TIME_KEY,        1, "0",   null, null),
@@ -121,7 +122,10 @@ namespace Omni
                     {
                         if (p.SharedDataSourceKey != null) fragmentData.Add(p.SharedDataSourceKey, p);     // try to add, duplicate keys ignored!
                     }
-                    catch (System.Exception) { }
+                    catch (System.Exception ex)
+                    {
+                        Log.Info(TAG, $"Exception in OnCreateView when adding text views: {ex}");
+                    }
                 }
             }
 
@@ -147,6 +151,28 @@ namespace Omni
             previousState = State.Running;      // initialise to running to trigger 'waiting for launch' snackbar when current state is retrieved for first time
 
             return view;
+        }
+
+        public override void OnDestroyView()
+        {
+            timeOfDayTimer?.Stop();             // tidy up timer and watchdogs to avoid events firing after view is destroyed
+            timeOfDayTimer?.Dispose();
+            timeOfDayTimer = null;
+            bluetoothWatchdog?.Stop();
+            uploadWatchdog?.Stop();
+            base.OnDestroyView();
+        }
+
+        public override void OnResume()
+        {
+            base.OnResume();
+            if (Context != null) PreferenceManager.GetDefaultSharedPreferences(Context)?.RegisterOnSharedPreferenceChangeListener(this);
+        }
+
+        public override void OnPause()
+        {
+            base.OnPause();
+            if (Context != null) PreferenceManager.GetDefaultSharedPreferences(Context)?.UnregisterOnSharedPreferenceChangeListener(this);
         }
 
         public void OnSharedPreferenceChanged(ISharedPreferences? sharedPreferences, string? key)
@@ -300,13 +326,10 @@ namespace Omni
 
             // get unit preferences
 
-            var preferences = PreferenceManager.GetDefaultSharedPreferences(Activity);
-            if (preferences == null) return; 
-
-            string? speedUnits = preferences.GetString(Resources.GetString(Resource.String.preference_key_speed), Resources.GetString(Resource.String.preference_option_speed_mph));
-            string? distanceUnits = preferences.GetString(Resources.GetString(Resource.String.preference_key_distance), Resources.GetString(Resource.String.preference_option_distance_miles));
-            string? energyUnits = preferences.GetString(Resources.GetString(Resource.String.preference_key_energy), Resources.GetString(Resource.String.preference_option_energy_ah));
-            // string efficiencyUnits = preferences.GetString(Resources.GetString(Resource.String.preference_key_efficiency), Resources.GetString(Resource.String.preference_option_efficiency_kj_mile));  // efficiency and units not shown on any fragment at present
+            string? speedUnits = EncryptedPreferenceHelper.DataStore?.GetString(Resources.GetString(Resource.String.preference_key_speed), Resources.GetString(Resource.String.preference_option_speed_mph));
+            string? distanceUnits = EncryptedPreferenceHelper.DataStore?.GetString(Resources.GetString(Resource.String.preference_key_distance), Resources.GetString(Resource.String.preference_option_distance_miles));
+            string? energyUnits = EncryptedPreferenceHelper.DataStore?.GetString(Resources.GetString(Resource.String.preference_key_energy), Resources.GetString(Resource.String.preference_option_energy_ah));
+            // string efficiencyUnits = EncryptedPreferenceHelper.DataStore?.GetString(Resources.GetString(Resource.String.preference_key_efficiency), Resources.GetString(Resource.String.preference_option_efficiency_kj_mile));  // efficiency and units not shown on any fragment at present
 
             // table of textviews which have unit dependent displays
 
@@ -370,6 +393,8 @@ namespace Omni
 
         public P(View ParentView, int ResourceId, int UnitResourceId, Type? Type, string? SharedDataSourceKey, double Multiplier, string Format, Action? LongClickAction, Poption[]? Options)
         {
+            string TAG = typeof(P).FullName ?? "DashboardFragment.P";
+
             this.ResourceId = ResourceId;
             this.Type = Type;
             this.SharedDataSourceKey = SharedDataSourceKey;
@@ -389,7 +414,10 @@ namespace Omni
                     {
                         LongClickAction();
                     }
-                    catch (DeadObjectException) { }     // Ignore lost connection to service
+                    catch (DeadObjectException ex)
+                    {
+                        Log.Info(TAG, $"Exception handling long click as service connection lost: {ex}");
+                    }
                 });
         }
     }
